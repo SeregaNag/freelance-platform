@@ -1,3 +1,5 @@
+"use client";
+
 import { Button, Container, Typography } from "@mui/material";
 
 export default function Home() {
