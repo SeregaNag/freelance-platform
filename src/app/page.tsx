@@ -1,4 +1,7 @@
+"use client";
+
 import { Button, Container, Typography } from "@mui/material";
+import OrderList from "@/components/OrderList";
 
 export default function Home() {
   return (
@@ -9,6 +12,8 @@ export default function Home() {
       <Button variant="contained" color="primary">
         Начать
       </Button>
+
+      <OrderList />
     </Container>
   );
 }
