@@ -1,6 +1,6 @@
 import { createTheme, PaletteOptions } from "@mui/material";
 
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   interface Palette {
     customStatus: {
       completed: string;
@@ -29,6 +29,6 @@ export const theme = createTheme({
       completed: "#4CAF50",
       pending: "#FF9800",
       canceled: "#F44336",
-    }
+    },
   },
 });
