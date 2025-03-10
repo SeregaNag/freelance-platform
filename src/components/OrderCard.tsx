@@ -1,16 +1,17 @@
-import { Paper,Typography, Container } from "@mui/material"
+import { Paper,Typography } from "@mui/material"
 import { useEffect, useState } from "react";
+import { OrderStatus, OrderCardProps } from "@/types/order";
 
 export default function OrderCard() {
-    const [status, setStatus] = useState("Completed");
+    const [status, setStatus] = useState<OrderStatus>("completed");
     const [statusColor, setStatusColor] = useState("black");
 
     useEffect(() => {
-        if (status === "Completed") {
+        if (status === "completed") {
             setStatusColor("green");
-        } else if (status === "Pending") {
+        } else if (status === "pending") {
             setStatusColor("yellow");
-        } else if (status === "Canceled") {
+        } else if (status === "cancelled") {
             setStatusColor("grey");
         }
     }, []);

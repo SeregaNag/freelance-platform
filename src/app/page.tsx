@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Container, Typography } from "@mui/material";
-import OrderCard from "@/components/OrderCard";
+import OrderList from "@/components/OrderList";
 
 export default function Home() {
   return (
@@ -12,7 +12,8 @@ export default function Home() {
       <Button variant="contained" color="primary">
         Начать
       </Button>
-      <OrderCard />
+
+      <OrderList />
     </Container>
   );
 }
