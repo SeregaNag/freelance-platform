@@ -7,8 +7,6 @@ export default function OrderList() {
     <Container>
       <OrderFilter />
       <OrderCard />
-      <OrderCard />
-      <OrderCard />
     </Container>
   );
 }
