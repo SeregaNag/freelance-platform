@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Box, Button, TextField } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
 
 interface CreateOrderFormProps {
     onClose: () => void;
@@ -13,6 +14,7 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log('Order created:', { title, description, price });
+        enqueueSnackbar('Заказ создан', { variant: 'success' });
         onClose();
     };
 
@@ -34,7 +36,7 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
                 fullWidth
                 margin="normal" />
             <TextField label="Цена" type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} fullWidth margin="normal" />
-            <Button variant="contained">Создать </Button>
+            <Button variant="contained" color="primary" type="submit">Создать </Button>
         </Box>
     )
 }
