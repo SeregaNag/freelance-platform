@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { createPortal } from "react-dom"
-import { Box, Modal } from "@mui/material";
+import { Box, Modal, Fade } from "@mui/material";
 
 interface ModalProps {
     isOpen: boolean;
@@ -29,12 +29,14 @@ export default function ModalWindow({ isOpen, onClose, children }: ModalProps) {
       aria-describedby="modal-description"
       className="flex items-center justify-center"
     >
+      <Fade in={isOpen} timeout={1000}>
       <Box
         className="bg-white rounded-lg p-6 w-full max-w-md"
         onClick={(e) => e.stopPropagation()}
       >
         {children}
       </Box>
+      </Fade>
     </Modal>,
     document.body 
   );
