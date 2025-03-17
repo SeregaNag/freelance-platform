@@ -1,8 +1,8 @@
-version: "3.8"
+version: '3.8'
 
 services:
   postgres:
-    image: postgres:14
+    image: postgres:14-alpine
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
@@ -10,7 +10,31 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d freelance"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://admin:admin@postgres:5432/freelance?schema=public"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  client:
+    build: ./client
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: "http://server:3000"
+    depends_on:
+      - server
 
 volumes:
-  postgres-data:
+  postgres_data:
