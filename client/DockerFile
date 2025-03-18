@@ -1,0 +1,16 @@
+# Используем официальный образ Node.js
+FROM node:18-alpine
+
+# Устанавливаем зависимости
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+# Копируем исходный код
+COPY . .
+
+# Собираем приложение
+RUN npm run build
+
+# Запускаем приложение
+CMD ["npm", "run", "start"]
