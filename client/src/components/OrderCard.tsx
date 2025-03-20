@@ -1,8 +1,13 @@
 import { Link, Paper, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { OrderStatus } from "@/types/order";
+import { Order } from "@/types/order";
 
-export default function OrderCard() {
+interface OrderCardProps {
+  order: Order;
+}
+
+export default function OrderCard({order}: OrderCardProps) {
   const [status, setStatus] = useState<OrderStatus>("completed");
   const [statusColor, setStatusColor] = useState("black");
 
@@ -19,11 +24,11 @@ export default function OrderCard() {
 
   return (
     <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-      <Typography variant="h5">Создать SPA, на Next.js</Typography>
-      <Typography variant="subtitle1">Цена: 1000 руб</Typography>
+      <Typography variant="h5">{order.title}</Typography>
+      <Typography variant="subtitle1">{order.price}</Typography>
 
       <Typography variant="subtitle2" color={statusColor}>
-        Статус: {status}
+        Статус: {order.status}
       </Typography>
       <Link href="/order/1" underline="none">
         Подробнее

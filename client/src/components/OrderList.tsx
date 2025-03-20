@@ -11,10 +11,7 @@ export default function OrderList() {
     <Container>
       <OrderFilter />
 
-      {filter === "all" && <OrderCardList />}
-      {filter === "completed" && <OrderCardList />}
-      {filter === "pending" && <OrderCardList />}
-      {filter === "cancelled" && <OrderCardList />}
+<OrderCardList filter={filter} />
     </Container>
   );
 }

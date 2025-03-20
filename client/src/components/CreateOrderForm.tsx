@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, TextField } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
+import { createOrder } from '@/api/api';
 
 interface CreateOrderFormProps {
     onClose: () => void;
@@ -11,10 +12,15 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState(0);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('Order created:', { title, description, price });
-        enqueueSnackbar('Заказ создан', { variant: 'success' });
+        try {
+            const newOrder = await createOrder({ title, description, price });
+            enqueueSnackbar('Заказ создан', { variant: 'success' });
+        } catch (error) {
+            enqueueSnackbar('Ошибка при создании заказа', { variant: 'error' });
+            return
+        }
         onClose();
     };
 
