@@ -16,9 +16,9 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
         e.preventDefault();
         try {
             const newOrder = await createOrder({ title, description, price });
-            enqueueSnackbar('Заказ создан', { variant: 'success' });
+            enqueueSnackbar(`Заказ "${newOrder.title}" успешно создан`, { variant: 'success' });
         } catch (error) {
-            enqueueSnackbar('Ошибка при создании заказа', { variant: 'error' });
+            enqueueSnackbar(`Ошибка при создании заказа ${(error as Error).message}`, { variant: 'error' });
             return
         }
         onClose();

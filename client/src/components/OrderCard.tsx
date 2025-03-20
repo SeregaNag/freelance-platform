@@ -20,7 +20,7 @@ export default function OrderCard({order}: OrderCardProps) {
     } else if (status === "cancelled") {
       setStatusColor("grey");
     }
-  }, []);
+  });
 
   return (
     <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
