@@ -5,25 +5,25 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrdersService {
-    constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {}
 
-    async create(createOrderDto: CreateOrderDto) {
-        return this.prisma.order.create({ data: createOrderDto });
-    }
+  async create(createOrderDto: CreateOrderDto) {
+    return this.prisma.order.create({ data: createOrderDto });
+  }
 
-    async findAll() {
-        return this.prisma.order.findMany();
-    }
+  async findAll() {
+    return this.prisma.order.findMany();
+  }
 
-    async findOne(id: string) {
-        return this.prisma.order.findUnique({ where: { id } });
-    }
+  async findOne(id: string) {
+    return this.prisma.order.findUnique({ where: { id } });
+  }
 
-    async update(id: string, updateOrderDto: UpdateOrderDto) {
-        return this.prisma.order.update({ where: { id }, data: updateOrderDto });
-    }
+  async update(id: string, updateOrderDto: UpdateOrderDto) {
+    return this.prisma.order.update({ where: { id }, data: updateOrderDto });
+  }
 
-    async remove(id: string) {
-        return this.prisma.order.delete({ where: { id } });
-    }
+  async remove(id: string) {
+    return this.prisma.order.delete({ where: { id } });
+  }
 }
