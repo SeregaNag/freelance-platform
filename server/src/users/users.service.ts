@@ -18,7 +18,7 @@ export class UsersService {
           name: createUserDto.name,
           email: createUserDto.email,
           password: hashedPassword,
-          roles: createUserDto.roles || ['freelancer'],
+          roles: createUserDto.roles || ['customer'],
         },
       });
       return user;
