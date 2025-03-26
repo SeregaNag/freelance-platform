@@ -35,7 +35,7 @@ export default function RegisterPage() {
       if (!res.ok) {
         setError(res.statusText);
       }
-      router.push("/");
+      router.push("/login");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Ошибка регистрации");
     }
