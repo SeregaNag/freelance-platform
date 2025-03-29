@@ -7,8 +7,17 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createOrderDto: CreateOrderDto) {
-    return this.prisma.order.create({ data: createOrderDto });
+  async create(createOrderDto: CreateOrderDto & { customerId: string }) {
+    return this.prisma.order.create({
+      data: {
+        title: createOrderDto.title,
+        description: createOrderDto.description,
+        price: createOrderDto.price,
+        customer: {
+          connect: { id: createOrderDto.customerId },
+        },
+      },
+    });
   }
 
   async findAll() {
