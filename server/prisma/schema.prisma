@@ -1,0 +1,37 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+ customerId  String
+  customer    User     @relation("CustomerOrders", fields: [customerId], references: [id])
+  
+  freelancerId String? 
+  freelancer   User?    @relation("FreelancerOrders", fields: [freelancerId], references: [id])
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  roles     String[] @default([]) // можно хранить роли, например, ["customer", "freelancer"]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerOrders   Order[] @relation("CustomerOrders")
+  freelancerOrders Order[] @relation("FreelancerOrders")
+}

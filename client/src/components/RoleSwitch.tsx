@@ -1,7 +1,6 @@
 'use client';
 
 import { RootState } from "@/store/store";
-import { UserRole } from "@/types/roles";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { setRole } from "@/features/userSlice";
