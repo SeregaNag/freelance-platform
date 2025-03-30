@@ -1,5 +1,4 @@
 import { Container } from "@mui/material";
-import OrderCard from "./OrderCard";
 import OrderFilter from "./OrderFilter";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
@@ -11,10 +10,7 @@ export default function OrderList() {
     <Container>
       <OrderFilter />
 
-      {filter === "all" && <OrderCardList />}
-      {filter === "completed" && <OrderCardList />}
-      {filter === "pending" && <OrderCardList />}
-      {filter === "cancelled" && <OrderCardList />}
+<OrderCardList filter={filter} />
     </Container>
   );
 }
