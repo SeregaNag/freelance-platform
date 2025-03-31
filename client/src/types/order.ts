@@ -15,6 +15,6 @@ export interface Order {
   status: string;
   createdAt: string;
   updatedAt: string;
-  customer: UserProfile;
+  customer?: UserProfile;
   freelancer?: UserProfile;
 }

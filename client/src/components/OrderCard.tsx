@@ -29,6 +29,7 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
       console.error("Ошибка при взятии заказа", error);
     }
   };
+  console.log(order);
 
   return (
     <Paper elevation={3} sx={{ p: 2, mb: 2 }}>

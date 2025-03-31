@@ -48,7 +48,7 @@ export default function Home() {
           </ModalWindow>
         </>
       )}
-      {currentRole === "freelancer" && <OrderList />}
+      <OrderList role={currentRole} />
     </Container>
   );
 }

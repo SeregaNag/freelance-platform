@@ -2,8 +2,15 @@ import OrderCard from "./OrderCard";
 import { Order } from "@/types/order";
 import { getOrders } from "@/api/api";
 import { useEffect, useState } from "react";
+import { UserRole } from "@/types/roles";
 
-export default function OrderCardList({ filter }: { filter: string }) {
+export default function OrderCardList({
+  filter,
+  role,
+}: {
+  filter: string;
+  role: UserRole;
+}) {
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
@@ -17,15 +24,16 @@ export default function OrderCardList({ filter }: { filter: string }) {
     }
 
     fetchOrders();
-  }, [])
-  
-  
+  }, []);
+
   return (
     <ul>
-      {orders.map(order => (
-        (order.status === filter || filter === "all") &&
-        <OrderCard key={order.id} order={order} />
-      ))}
+      {orders.map(
+        (order) =>
+          (order.status === filter || filter === "all") && (
+            <OrderCard key={order.id} order={order} userRole={role} />
+          )
+      )}
     </ul>
   );
 }

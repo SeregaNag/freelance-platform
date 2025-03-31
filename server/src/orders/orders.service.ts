@@ -17,11 +17,18 @@ export class OrdersService {
           connect: { id: createOrderDto.customerId },
         },
       },
+      include: {
+        customer: true,
+      },
     });
   }
 
   async findAll() {
-    return this.prisma.order.findMany();
+    return this.prisma.order.findMany({
+      include: {
+        customer: true,
+      },
+    });
   }
 
   async findOne(id: string) {
