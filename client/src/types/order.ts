@@ -1,3 +1,5 @@
+import { UserProfile } from "./profile";
+
 export type OrderStatus = "pending" | "completed" | "cancelled";
 export type OrderStatusFilter = "all" | OrderStatus;
 
@@ -13,4 +15,6 @@ export interface Order {
   status: string;
   createdAt: string;
   updatedAt: string;
+  customer: UserProfile;
+  freelancer?: UserProfile;
 }
