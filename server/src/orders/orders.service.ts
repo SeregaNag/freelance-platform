@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class OrdersService {
@@ -41,5 +42,31 @@ export class OrdersService {
 
   async remove(id: string) {
     return this.prisma.order.delete({ where: { id } });
+  }
+
+  async takeOrder(orderId: string, freelancerId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+    if (!order) {
+      throw new NotFoundException('Заказ не найден');
+    }
+    if (order.status !== 'pending') {
+      throw new BadRequestException('Заказ недоступен для взятия');
+    }
+
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        freelancer: {
+          connect: { id: freelancerId },
+        },
+        status: 'in_progress',
+      },
+      include: {
+        customer: true,
+        freelancer: true,
+      },
+    });
   }
 }
