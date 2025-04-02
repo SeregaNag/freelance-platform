@@ -21,15 +21,39 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
 
   const handleTakeOrder = async () => {
     try {
-      // Здесь можно вызвать API для взятия заказа:
-      // await takeOrderAPI(order.id);
-      // После успешного ответа перенаправляем в чат с заказчиком:
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/take`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+      if (!res.ok) {
+        throw new Error("Ошибка при взятии заказа");
+      }
       router.push(`/chat?orderId=${order.id}`);
     } catch (error) {
       console.error("Ошибка при взятии заказа", error);
     }
   };
-  console.log(order);
+
+  const handleConfirmOrder = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/confirm`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+      if (!res.ok) {
+        throw new Error("Ошибка при подтверждении заказа");
+      }
+      router.push(`/orders/${order.id}`);
+    } catch (error) {
+      console.error("Ошибка при подтверждении заказа", error);
+    }
+  };
 
   return (
     <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
@@ -57,6 +81,16 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
           sx={{ mt: 1 }}
         >
           Взять заказ
+        </Button>
+      )}
+      {userRole === "client" && order.status === "in_progress" && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleConfirmOrder}
+          sx={{ mt: 1 }}
+        >
+          Подтвердить заказ
         </Button>
       )}
     </Paper>

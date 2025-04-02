@@ -69,4 +69,29 @@ export class OrdersService {
       },
     });
   }
+
+  async confirmOrder(orderId: string, customerId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+    if (!order) {
+      throw new NotFoundException('Заказ не найден');
+    }
+    if (order.customerId !== customerId) {
+      throw new BadRequestException('Вы не можете подтвердить этот заказ');
+    }
+    if (order.status !== 'in_progress') {
+      throw new BadRequestException('Заказ не может быть подтвержден');
+    }
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status: 'completed',
+      },
+      include: {
+        customer: true,
+        freelancer: true,
+      },
+    });
+  }
 }

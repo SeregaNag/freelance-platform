@@ -44,4 +44,18 @@ export class OrdersController {
   remove(@Param('id') id: string) {
     return this.ordersService.remove(id);
   }
+
+  @Post(':id/take')
+  @UseGuards(JwtAuthGuard)
+  async takeOrder(@Param('id') id: string, @Req() req: Request) {
+    const freelancerId = (req as any).user.userId;
+    return this.ordersService.takeOrder(id, freelancerId);
+  }
+
+  @Post(':id/confirm')
+  @UseGuards(JwtAuthGuard)
+  async confirmOrder(@Param('id') id: string, @Req() req: Request) {
+    const customerId = (req as any).user.userId;
+    return this.ordersService.confirmOrder(id, customerId);
+  }
 }
