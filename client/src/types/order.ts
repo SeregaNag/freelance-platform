@@ -1,6 +1,6 @@
 import { UserProfile } from "./profile";
 
-export type OrderStatus = "pending" | "completed" | "cancelled";
+export type OrderStatus = "pending" | "in_progress" | "completed" | "cancelled";
 export type OrderStatusFilter = "all" | OrderStatus;
 
 export interface OrderCardProps {
@@ -12,7 +12,7 @@ export interface Order {
   title: string;
   description: string;
   price: number;
-  status: string;
+  status: OrderStatus;
   createdAt: string;
   updatedAt: string;
   customer?: UserProfile;

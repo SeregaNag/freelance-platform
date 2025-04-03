@@ -1,7 +1,23 @@
 import { Button, Link as MuiLink, Paper, Typography } from "@mui/material";
-import { Order } from "@/types/order";
+import { Order, OrderStatus } from "@/types/order";
 import { UserRole } from "@/types/roles";
 import { useRouter } from "next/navigation";
+
+const getStatusText = (status: OrderStatus): string => {
+  switch (status) {
+    case "pending":
+      return "Заказ свободен";
+    case "in_progress":
+      return "В работе";
+    case "completed":
+      return "Завершен";
+    case "cancelled":
+      return "Отменен";
+    default:
+      return status;
+  }
+};
+
 interface OrderCardProps {
   order: Order;
   userRole: UserRole;
@@ -61,7 +77,7 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
       <Typography variant="subtitle1">Цена: {order.price}</Typography>
 
       <Typography variant="subtitle2" color={statusColor}>
-        Статус: {order.status}
+        Статус: {getStatusText(order.status)}
       </Typography>
 
       {order.customer && (
