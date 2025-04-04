@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppBar, Toolbar, Typography } from "@mui/material";
+import { usePathname } from "next/navigation";
 
 interface UserProfile {
   id: string;
@@ -13,6 +14,7 @@ interface UserProfile {
 
 export default function Header() {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     async function fetchProfile() {
@@ -38,7 +40,11 @@ export default function Header() {
     <AppBar position="static">
       <Toolbar className="flex justify-between">
         {/* Логотип/название платформы */}
-        <Link href="/" passHref>
+        <Link
+          href="/"
+          passHref
+          className={`link ${pathname === "/" ? "border-2 border-white rounded p-1 text-white" : ""}`}
+        >
           <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
             Freelance Platform
           </Typography>
@@ -46,7 +52,7 @@ export default function Header() {
 
         {/* Если пользователь авторизован, отображаем его имя или email */}
         {user && (
-          <Link href="/profile" passHref>
+          <Link href="/profile" passHref className={`link ${pathname === "/profile" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
             <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
               {user.name || user.email}
             </Typography>
