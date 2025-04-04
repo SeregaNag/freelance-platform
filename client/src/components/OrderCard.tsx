@@ -86,6 +86,28 @@ export default function OrderCard({ order, userRole, currentUser }: OrderCardPro
     }
   };
 
+  const handleDeleteOrder = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+      if (!res.ok) {
+        throw new Error("Ошибка при удалении заказа");
+      }
+      // Обновляем страницу после удаления
+      window.location.reload();
+    } catch (error) {
+      console.error("Ошибка при удалении заказа", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Paper 
       elevation={3} 
@@ -129,33 +151,44 @@ export default function OrderCard({ order, userRole, currentUser }: OrderCardPro
         Подробнее
       </MuiLink>
       
-      {userRole === "freelancer" && 
-       order.status === "pending" && 
-       !isCurrentUserOrder && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleTakeOrder}
-          sx={{ mt: 1 }}
-          disabled={isLoading}
-        >
-          {isLoading ? "Загрузка..." : "Взять заказ"}
-        </Button>
-      )}
-      
-      {userRole === "client" && 
-       order.status === "in_progress" && 
-       isCurrentUserOrder && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleConfirmOrder}
-          sx={{ mt: 1 }}
-          disabled={isLoading}
-        >
-          {isLoading ? "Загрузка..." : "Подтвердить заказ"}
-        </Button>
-      )}
+      <div className="flex gap-2 mt-2">
+        {userRole === "freelancer" && 
+         order.status === "pending" && 
+         !isCurrentUserOrder && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleTakeOrder}
+            disabled={isLoading}
+          >
+            {isLoading ? "Загрузка..." : "Взять заказ"}
+          </Button>
+        )}
+        
+        {userRole === "client" && 
+         order.status === "in_progress" && 
+         isCurrentUserOrder && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleConfirmOrder}
+            disabled={isLoading}
+          >
+            {isLoading ? "Загрузка..." : "Подтвердить заказ"}
+          </Button>
+        )}
+
+        {isCurrentUserOrder  && (
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDeleteOrder}
+            disabled={isLoading}
+          >
+            {isLoading ? "Загрузка..." : "Удалить заказ"}
+          </Button>
+        )}
+      </div>
     </Paper>
   );
 }
