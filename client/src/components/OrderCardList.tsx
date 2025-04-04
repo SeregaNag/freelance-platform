@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { UserRole } from "@/types/roles";
 import LoadingSpinner from "./LoadingSpinner";
 import { Typography } from "@mui/material";
+import { UserProfile } from "@/types/profile";
 
 export default function OrderCardList({
   filter,
@@ -16,6 +17,28 @@ export default function OrderCardList({
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
+          {
+            credentials: "include",
+          }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentUser(data);
+        }
+      } catch (error) {
+        console.error("Ошибка при получении профиля:", error);
+      }
+    }
+
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     async function fetchOrders() {
@@ -51,7 +74,12 @@ export default function OrderCardList({
       {orders.map(
         (order) =>
           (order.status === filter || filter === "all") && (
-            <OrderCard key={order.id} order={order} userRole={role} />
+            <OrderCard 
+              key={order.id} 
+              order={order} 
+              userRole={role} 
+              currentUser={currentUser || undefined}
+            />
           )
       )}
     </ul>

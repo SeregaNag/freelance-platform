@@ -1,8 +1,9 @@
-import { Button, Link as MuiLink, Paper, Typography } from "@mui/material";
+import { Button, Link as MuiLink, Paper, Typography, Chip } from "@mui/material";
 import { Order, OrderStatus } from "@/types/order";
 import { UserRole } from "@/types/roles";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { UserProfile } from "@/types/profile";
 
 const getStatusText = (status: OrderStatus): string => {
   switch (status) {
@@ -22,11 +23,15 @@ const getStatusText = (status: OrderStatus): string => {
 interface OrderCardProps {
   order: Order;
   userRole: UserRole;
+  currentUser?: UserProfile;
 }
 
-export default function OrderCard({ order, userRole }: OrderCardProps) {
+export default function OrderCard({ order, userRole, currentUser }: OrderCardProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+
+  const isCurrentUserOrder = currentUser && order.customer?.id === currentUser.id;
+  const isCurrentUserFreelancer = currentUser && order.freelancer?.id === currentUser.id;
 
   const statusColor =
     order.status === "completed"
@@ -82,7 +87,32 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+    <Paper 
+      elevation={3} 
+      sx={{ 
+        p: 2, 
+        mb: 2,
+        border: isCurrentUserOrder ? '2px solid #4CAF50' : 'none',
+        position: 'relative'
+      }}
+    >
+      {isCurrentUserOrder && (
+        <Chip 
+          label="Ваш заказ" 
+          color="success" 
+          size="small"
+          sx={{ position: 'absolute', top: 8, right: 8 }}
+        />
+      )}
+      {isCurrentUserFreelancer && (
+        <Chip 
+          label="Вы исполнитель" 
+          color="primary" 
+          size="small"
+          sx={{ position: 'absolute', top: 8, right: 8 }}
+        />
+      )}
+      
       <Typography variant="h5">{order.title}</Typography>
       <Typography variant="subtitle1">Цена: {order.price}</Typography>
 
@@ -98,8 +128,10 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
       <MuiLink href={`/orders/${order.id}`} underline="none">
         Подробнее
       </MuiLink>
-      {/* Если текущий пользователь — фрилансер и заказ еще в состоянии "pending", показываем кнопку "Взять заказ" */}
-      {userRole === "freelancer" && order.status === "pending" && (
+      
+      {userRole === "freelancer" && 
+       order.status === "pending" && 
+       !isCurrentUserOrder && (
         <Button
           variant="contained"
           color="primary"
@@ -110,7 +142,10 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
           {isLoading ? "Загрузка..." : "Взять заказ"}
         </Button>
       )}
-      {userRole === "client" && order.status === "in_progress" && (
+      
+      {userRole === "client" && 
+       order.status === "in_progress" && 
+       isCurrentUserOrder && (
         <Button
           variant="contained"
           color="primary"
