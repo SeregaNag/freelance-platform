@@ -3,7 +3,8 @@
 import { UserProfile } from "@/types/profile";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Box, CircularProgress, Container, Typography } from "@mui/material";
+import { Container, Typography } from "@mui/material";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -39,14 +40,7 @@ export default function ProfilePage() {
   }, [router]);
 
   if (loading) {
-    return (
-      <Container className="min-h-screen flex flex-col items-center justify-center">
-        <CircularProgress />
-        <Typography variant="h6" sx={{ mt: 2 }}>
-          Загрузка профиля...
-        </Typography>
-      </Container>
-    );
+    return <LoadingSpinner message="Загрузка профиля..." />;
   }
 
   if (error) {
@@ -64,28 +58,15 @@ export default function ProfilePage() {
       <Typography variant="h4" gutterBottom>
         Профиль пользователя
       </Typography>
-      {profile && (
-        <Box className="bg-white shadow-md rounded p-4 w-full max-w-md">
-          <Typography variant="body1">
-            <strong>ID:</strong> {profile.id}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Email:</strong> {profile.email}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Имя:</strong> {profile.name || "Не указано"}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Роли:</strong> {profile.roles.join(", ")}
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            Создан: {new Date(profile.createdAt).toLocaleString()}
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            Обновлён: {new Date(profile.updatedAt).toLocaleString()}
-          </Typography>
-        </Box>
-      )}
+      <Typography variant="h6">
+        Имя: {profile?.name || "Не указано"}
+      </Typography>
+      <Typography variant="h6">
+        Email: {profile?.email}
+      </Typography>
+      <Typography variant="h6">
+        Роли: {profile?.roles.join(", ")}
+      </Typography>
     </Container>
   );
 }

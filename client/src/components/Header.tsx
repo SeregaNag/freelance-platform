@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AppBar, Toolbar, Typography } from "@mui/material";
+import { AppBar, Toolbar, Typography, CircularProgress } from "@mui/material";
 import { usePathname } from "next/navigation";
 
 interface UserProfile {
@@ -14,11 +14,13 @@ interface UserProfile {
 
 export default function Header() {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
 
   useEffect(() => {
     async function fetchProfile() {
       try {
+        setLoading(true);
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
           {
@@ -31,6 +33,8 @@ export default function Header() {
         }
       } catch (error) {
         console.error("Ошибка при получении профиля:", error);
+      } finally {
+        setLoading(false);
       }
     }
     fetchProfile();
@@ -51,28 +55,27 @@ export default function Header() {
         </Link>
 
         <div className="flex gap-4">
-          {!user && (
-            <Link href="/login" passHref className={`p-1 ${pathname === "/login" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
-              <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
-                Вход
-              </Typography>
-            </Link>
-          )}
-
-          {!user && (
-            <Link href="/register" passHref className={`p-1 ${pathname === "/register" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
-              <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
-                Регистрация
-              </Typography>
-            </Link>
-          )}
-
-          {user && (
-            <Link href="/profile" passHref className={`p-1 ${pathname === "/profile" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
+          {loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : user ? (
+            <Link href="/profile" passHref className={`link ${pathname === "/profile" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
               <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
                 {user.name || user.email}
               </Typography>
             </Link>
+          ) : (
+            <>
+              <Link href="/login" passHref className={`link ${pathname === "/login" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
+                <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
+                  Вход
+                </Typography>
+              </Link>
+              <Link href="/register" passHref className={`link ${pathname === "/register" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
+                <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
+                  Регистрация
+                </Typography>
+              </Link>
+            </>
           )}
         </div>
       </Toolbar>

@@ -2,6 +2,7 @@ import { Button, Link as MuiLink, Paper, Typography } from "@mui/material";
 import { Order, OrderStatus } from "@/types/order";
 import { UserRole } from "@/types/roles";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const getStatusText = (status: OrderStatus): string => {
   switch (status) {
@@ -25,6 +26,7 @@ interface OrderCardProps {
 
 export default function OrderCard({ order, userRole }: OrderCardProps) {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const statusColor =
     order.status === "completed"
@@ -39,6 +41,7 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
 
   const handleTakeOrder = async () => {
     try {
+      setIsLoading(true);
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/take`,
         {
@@ -52,11 +55,14 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
       router.push(`/chat?orderId=${order.id}`);
     } catch (error) {
       console.error("Ошибка при взятии заказа", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleConfirmOrder = async () => {
     try {
+      setIsLoading(true);
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/confirm`,
         {
@@ -70,6 +76,8 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
       router.push(`/orders/${order.id}`);
     } catch (error) {
       console.error("Ошибка при подтверждении заказа", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -97,8 +105,9 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
           color="primary"
           onClick={handleTakeOrder}
           sx={{ mt: 1 }}
+          disabled={isLoading}
         >
-          Взять заказ
+          {isLoading ? "Загрузка..." : "Взять заказ"}
         </Button>
       )}
       {userRole === "client" && order.status === "in_progress" && (
@@ -107,8 +116,9 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
           color="primary"
           onClick={handleConfirmOrder}
           sx={{ mt: 1 }}
+          disabled={isLoading}
         >
-          Подтвердить заказ
+          {isLoading ? "Загрузка..." : "Подтвердить заказ"}
         </Button>
       )}
     </Paper>

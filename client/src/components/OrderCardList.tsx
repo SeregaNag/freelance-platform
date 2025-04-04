@@ -3,6 +3,8 @@ import { Order } from "@/types/order";
 import { getOrders } from "@/api/api";
 import { useEffect, useState } from "react";
 import { UserRole } from "@/types/roles";
+import LoadingSpinner from "./LoadingSpinner";
+import { Typography } from "@mui/material";
 
 export default function OrderCardList({
   filter,
@@ -12,19 +14,37 @@ export default function OrderCardList({
   role: UserRole;
 }) {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchOrders() {
       try {
+        setLoading(true);
         const data = await getOrders();
         setOrders(data);
       } catch (error) {
+        setError(error instanceof Error ? error.message : "Ошибка загрузки заказов");
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchOrders();
   }, []);
+
+  if (loading) {
+    return <LoadingSpinner message="Загрузка заказов..." />;
+  }
+
+  if (error) {
+    return (
+      <Typography color="error" sx={{ textAlign: "center", mt: 2 }}>
+        {error}
+      </Typography>
+    );
+  }
 
   return (
     <ul>
