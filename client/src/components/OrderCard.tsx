@@ -33,6 +33,8 @@ export default function OrderCard({ order, userRole }: OrderCardProps) {
       ? "yellow"
       : order.status === "cancelled"
       ? "grey"
+      : order.status === "in_progress"
+      ? "blue"
       : "black";
 
   const handleTakeOrder = async () => {
