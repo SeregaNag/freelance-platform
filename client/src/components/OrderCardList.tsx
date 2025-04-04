@@ -6,6 +6,8 @@ import { UserRole } from "@/types/roles";
 import LoadingSpinner from "./LoadingSpinner";
 import { Typography } from "@mui/material";
 import { UserProfile } from "@/types/profile";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 export default function OrderCardList({
   filter,
@@ -18,6 +20,7 @@ export default function OrderCardList({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const modifiedOrderIds = useSelector((state: RootState) => state.orders.modifiedOrderIds);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -55,7 +58,7 @@ export default function OrderCardList({
     }
 
     fetchOrders();
-  }, []);
+  }, [role, modifiedOrderIds]);
 
   if (loading) {
     return <LoadingSpinner message="Загрузка заказов..." />;

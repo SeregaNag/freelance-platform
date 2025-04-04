@@ -7,10 +7,10 @@ import { UserRole } from "@/types/roles";
 
 export default function OrderList({ role }: { role: UserRole }) {
   const filter = useSelector((state: RootState) => state.filters.status);
+
   return (
     <Container>
       <OrderFilter />
-
       <OrderCardList filter={filter} role={role} />
     </Container>
   );

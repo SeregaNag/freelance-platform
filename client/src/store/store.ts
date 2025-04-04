@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import filterReducer from "../features/filterSlice";
 import userReducer from "../features/userSlice";
+import ordersReducer from "../features/ordersSlice";
 
 export const store = configureStore({
   reducer: {
     filters: filterReducer,
     user: userReducer,
+    orders: ordersReducer,
   },
 });
 

@@ -4,6 +4,8 @@ import { UserRole } from "@/types/roles";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { UserProfile } from "@/types/profile";
+import { useDispatch } from "react-redux";
+import { orderModified } from "@/features/ordersSlice";
 
 const getStatusText = (status: OrderStatus): string => {
   switch (status) {
@@ -29,6 +31,7 @@ interface OrderCardProps {
 export default function OrderCard({ order, userRole, currentUser }: OrderCardProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const isCurrentUserOrder = currentUser && order.customer?.id === currentUser.id;
   const isCurrentUserFreelancer = currentUser && order.freelancer?.id === currentUser.id;
@@ -57,6 +60,7 @@ export default function OrderCard({ order, userRole, currentUser }: OrderCardPro
       if (!res.ok) {
         throw new Error("Ошибка при взятии заказа");
       }
+      dispatch(orderModified(order.id));
       router.push(`/chat?orderId=${order.id}`);
     } catch (error) {
       console.error("Ошибка при взятии заказа", error);
@@ -78,6 +82,7 @@ export default function OrderCard({ order, userRole, currentUser }: OrderCardPro
       if (!res.ok) {
         throw new Error("Ошибка при подтверждении заказа");
       }
+      dispatch(orderModified(order.id));
       router.push(`/orders/${order.id}`);
     } catch (error) {
       console.error("Ошибка при подтверждении заказа", error);
@@ -99,8 +104,7 @@ export default function OrderCard({ order, userRole, currentUser }: OrderCardPro
       if (!res.ok) {
         throw new Error("Ошибка при удалении заказа");
       }
-      // Обновляем страницу после удаления
-      window.location.reload();
+      dispatch(orderModified(order.id));
     } catch (error) {
       console.error("Ошибка при удалении заказа", error);
     } finally {
