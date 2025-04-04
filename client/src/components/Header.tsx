@@ -38,7 +38,7 @@ export default function Header() {
 
   return (
     <AppBar position="static">
-      <Toolbar className="flex justify-between">
+      <Toolbar className="flex justify-between items-center">
         {/* Логотип/название платформы */}
         <Link
           href="/"
@@ -50,14 +50,31 @@ export default function Header() {
           </Typography>
         </Link>
 
-        {/* Если пользователь авторизован, отображаем его имя или email */}
-        {user && (
-          <Link href="/profile" passHref className={`link ${pathname === "/profile" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
-            <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
-              {user.name || user.email}
-            </Typography>
-          </Link>
-        )}
+        <div className="flex gap-4">
+          {!user && (
+            <Link href="/login" passHref className={`p-1 ${pathname === "/login" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
+              <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
+                Вход
+              </Typography>
+            </Link>
+          )}
+
+          {!user && (
+            <Link href="/register" passHref className={`p-1 ${pathname === "/register" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
+              <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
+                Регистрация
+              </Typography>
+            </Link>
+          )}
+
+          {user && (
+            <Link href="/profile" passHref className={`p-1 ${pathname === "/profile" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
+              <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
+                {user.name || user.email}
+              </Typography>
+            </Link>
+          )}
+        </div>
       </Toolbar>
     </AppBar>
   );
