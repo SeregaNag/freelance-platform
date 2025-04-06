@@ -1,44 +1,52 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import { AppBar, Toolbar, Typography, CircularProgress } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { usePathname } from "next/navigation";
-
-interface UserProfile {
-  id: string;
-  email: string;
-  name?: string;
-  roles: string[];
-}
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { setProfile } from "@/features/profileSlice";
 
 export default function Header() {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
   const pathname = usePathname();
+  const dispatch = useDispatch();
+  const profile = useSelector((state: RootState) => state.profile.profile);
 
   useEffect(() => {
     async function fetchProfile() {
       try {
-        setLoading(true);
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
           {
-            credentials: "include", // отправляем httpOnly cookie
+            credentials: "include",
           }
         );
         if (res.ok) {
           const data = await res.json();
-          setUser(data);
+          dispatch(setProfile(data));
         }
       } catch (error) {
         console.error("Ошибка при получении профиля:", error);
-      } finally {
-        setLoading(false);
       }
     }
     fetchProfile();
-  }, []);
+  }, [dispatch]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      dispatch(setProfile(null));
+      router.push("/login");
+    } catch (error) {
+      console.error("Ошибка при выходе:", error);
+    }
+  };
 
   return (
     <AppBar position="static">
@@ -47,7 +55,11 @@ export default function Header() {
         <Link
           href="/"
           passHref
-          className={`link ${pathname === "/" ? "border-2 border-white rounded p-1 text-white" : ""}`}
+          className={`link ${
+            pathname === "/"
+              ? "border-2 border-white rounded p-1 text-white"
+              : ""
+          }`}
         >
           <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
             Freelance Platform
@@ -55,23 +67,62 @@ export default function Header() {
         </Link>
 
         <div className="flex gap-4">
-          {loading ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : user ? (
-            <Link href="/profile" passHref className={`link ${pathname === "/profile" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
-              <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
-                {user.name || user.email}
-              </Typography>
-            </Link>
+          {profile ? (
+            <>
+              <Link
+                href="/profile"
+                passHref
+                className={`link ${
+                  pathname === "/profile"
+                    ? "border-2 border-white rounded p-1 text-white"
+                    : ""
+                }`}
+              >
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{ cursor: "pointer" }}
+                >
+                  {profile.name || profile.email}
+                </Typography>
+              </Link>
+              <Button color="inherit" onClick={handleLogout}>
+                Выйти
+              </Button>
+            </>
           ) : (
             <>
-              <Link href="/login" passHref className={`link ${pathname === "/login" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
-                <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
+              <Link
+                href="/login"
+                passHref
+                className={`link ${
+                  pathname === "/login"
+                    ? "border-2 border-white rounded p-1 text-white"
+                    : ""
+                }`}
+              >
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{ cursor: "pointer" }}
+                >
                   Вход
                 </Typography>
               </Link>
-              <Link href="/register" passHref className={`link ${pathname === "/register" ? "border-2 border-white rounded p-1 text-white" : ""}`}>
-                <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
+              <Link
+                href="/register"
+                passHref
+                className={`link ${
+                  pathname === "/register"
+                    ? "border-2 border-white rounded p-1 text-white"
+                    : ""
+                }`}
+              >
+                <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{ cursor: "pointer" }}
+                >
                   Регистрация
                 </Typography>
               </Link>

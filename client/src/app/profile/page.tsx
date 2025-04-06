@@ -3,7 +3,7 @@
 import { UserProfile } from "@/types/profile";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Container, Typography } from "@mui/material";
+import { Box, Button, Container, Typography } from "@mui/material";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function ProfilePage() {
@@ -58,15 +58,34 @@ export default function ProfilePage() {
       <Typography variant="h4" gutterBottom>
         Профиль пользователя
       </Typography>
-      <Typography variant="h6">
-        Имя: {profile?.name || "Не указано"}
-      </Typography>
-      <Typography variant="h6">
-        Email: {profile?.email}
-      </Typography>
-      <Typography variant="h6">
-        Роли: {profile?.roles.join(", ")}
-      </Typography>
+      {profile && (
+        <Box className="bg-white shadow-md rounded p-4 w-full max-w-md">
+          <Typography variant="body1">
+            <strong>Email:</strong> {profile.email}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Имя:</strong> {profile.name || "Не указано"}
+          </Typography>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={async () => {
+              try {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+                  method: "POST",
+                  credentials: "include",
+                });
+                router.push("/login");
+              } catch (error) {
+                console.error("Ошибка при выходе:", error);
+              }
+            }}
+            sx={{ mt: 2 }}
+          >
+            Выйти из аккаунта
+          </Button>
+        </Box>
+      )}
     </Container>
   );
 }
