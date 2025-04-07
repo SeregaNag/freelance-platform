@@ -32,3 +32,14 @@ export async function getOrders(): Promise<Order[]> {
 
   return response.json();
 }
+
+export async function getOrder(id: string): Promise<Order> {
+  const response = await fetch(`${API_URL}/orders/${id}`);
+
+  if (!response.ok) {
+    throw new Error("Ошибка при загрузке заказа");
+  }
+
+  return response.json();
+}
+

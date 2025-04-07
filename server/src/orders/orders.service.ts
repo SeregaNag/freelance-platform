@@ -33,7 +33,13 @@ export class OrdersService {
   }
 
   async findOne(id: string) {
-    return this.prisma.order.findUnique({ where: { id } });
+    return this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        customer: true,
+        freelancer: true,
+      },
+    });
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto) {
