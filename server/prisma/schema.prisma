@@ -14,6 +14,16 @@ enum OrderStatus {
   completed
 }
 
+model Message {
+  id    String @id @default(uuid())
+  content   String
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  createdAt DateTime @default(now())
+}
+
 model Order {
   id          String   @id @default(uuid())
   title       String
@@ -28,6 +38,8 @@ model Order {
   
   freelancerId String? 
   freelancer   User?    @relation("FreelancerOrders", fields: [freelancerId], references: [id])
+
+  messages    Message[]
 }
 
 model User {
@@ -41,4 +53,5 @@ model User {
 
   customerOrders   Order[] @relation("CustomerOrders")
   freelancerOrders Order[] @relation("FreelancerOrders")
+  sentMessages     Message[]
 }
