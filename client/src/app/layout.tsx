@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Freelance",
+  title: "My Platform",
   description: "Freelance",
 };
 

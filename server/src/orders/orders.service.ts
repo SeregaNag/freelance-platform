@@ -67,7 +67,7 @@ export class OrdersService {
         freelancer: {
           connect: { id: freelancerId },
         },
-        status: 'in_progress',
+        status: 'waiting_confirmation',
       },
       include: {
         customer: true,
@@ -86,13 +86,13 @@ export class OrdersService {
     if (order.customerId !== customerId) {
       throw new BadRequestException('Вы не можете подтвердить этот заказ');
     }
-    if (order.status !== 'in_progress') {
+    if (order.status !== 'waiting_confirmation') {
       throw new BadRequestException('Заказ не может быть подтвержден');
     }
     return this.prisma.order.update({
       where: { id: orderId },
       data: {
-        status: 'completed',
+        status: 'in_progress',
       },
       include: {
         customer: true,

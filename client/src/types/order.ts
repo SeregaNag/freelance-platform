@@ -1,6 +1,6 @@
 import { UserProfile } from "./profile";
 
-export type OrderStatus = "pending" | "in_progress" | "completed" | "cancelled";
+export type OrderStatus = "pending" | "waiting_confirmation" | "in_progress" | "completed" | "cancelled";
 export type OrderStatusFilter = "all" | OrderStatus;
 
 export interface OrderCardProps {
@@ -13,8 +13,16 @@ export interface Order {
   description: string;
   price: number;
   status: OrderStatus;
-  createdAt: string;
-  updatedAt: string;
   customer?: UserProfile;
   freelancer?: UserProfile;
+  applications?: OrderApplication[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrderApplication {
+  id: string;
+  freelancer: UserProfile;
+  status: "pending" | "accepted" | "rejected";
+  createdAt: string;
 }

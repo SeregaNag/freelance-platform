@@ -4,8 +4,9 @@ import {
   Paper,
   Typography,
   Chip,
+  Box,
 } from "@mui/material";
-import { Order, OrderStatus } from "@/types/order";
+import { Order, OrderStatus, OrderApplication } from "@/types/order";
 import { UserRole } from "@/types/roles";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -17,6 +18,8 @@ const getStatusText = (status: OrderStatus): string => {
   switch (status) {
     case "pending":
       return "Заказ свободен";
+    case "waiting_confirmation":
+      return "Ожидает подтверждения";
     case "in_progress":
       return "В работе";
     case "completed":
@@ -47,6 +50,22 @@ export default function OrderCard({
     currentUser && order.customer?.id === currentUser.id;
   const isCurrentUserFreelancer =
     currentUser && order.freelancer?.id === currentUser.id;
+  const hasApplied = order.applications?.some(
+    (app) => app.freelancer.id === currentUser?.id
+  );
+
+  const statusColor =
+    order.status === "completed"
+      ? "green"
+      : order.status === "pending"
+      ? "yellow"
+      : order.status === "cancelled"
+      ? "grey"
+      : order.status === "in_progress"
+      ? "blue"
+      : order.status === "waiting_confirmation"
+      ? "orange"
+      : "black";
 
   const handleTakeOrder = async () => {
     try {
@@ -113,6 +132,69 @@ export default function OrderCard({
     }
   };
 
+  const handleApply = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/apply`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+      if (!res.ok) {
+        throw new Error("Ошибка при подаче заявки");
+      }
+      dispatch(orderModified(order.id));
+    } catch (error) {
+      console.error("Ошибка при подаче заявки", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAcceptApplication = async (applicationId: string) => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/applications/${applicationId}/accept`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+      if (!res.ok) {
+        throw new Error("Ошибка при принятии заявки");
+      }
+      dispatch(orderModified(order.id));
+    } catch (error) {
+      console.error("Ошибка при принятии заявки", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRejectApplication = async (applicationId: string) => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/orders/${order.id}/applications/${applicationId}/reject`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+      if (!res.ok) {
+        throw new Error("Ошибка при отклонении заявки");
+      }
+      dispatch(orderModified(order.id));
+    } catch (error) {
+      console.error("Ошибка при отклонении заявки", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Paper
       elevation={3}
@@ -143,30 +225,56 @@ export default function OrderCard({
       <Typography variant="h5">{order.title}</Typography>
       <Typography variant="subtitle1">Цена: {order.price}</Typography>
 
-      <Chip
-        label={getStatusText(order.status)}
-        color={
-          order.status === "completed"
-            ? "success"
-            : order.status === "pending"
-            ? "warning"
-            : order.status === "cancelled"
-            ? "default"
-            : "primary"
-        }
-        sx={{ mt: 1 }}
-      />
+      <Typography variant="subtitle2" color={statusColor}>
+        Статус: {getStatusText(order.status)}
+      </Typography>
 
       {order.customer && (
         <Typography variant="body2">
           Заказчик: {order.customer.name || order.customer.email}
         </Typography>
       )}
+
+      {order.applications && order.applications.length > 0 && (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle2">Заявки:</Typography>
+          {order.applications.map((app) => (
+            <Box key={app.id} sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+              <Typography variant="body2">
+                {app.freelancer.name || app.freelancer.email}
+              </Typography>
+              {isCurrentUserOrder && order.status === "pending" && (
+                <>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="success"
+                    onClick={() => handleAcceptApplication(app.id)}
+                    disabled={isLoading}
+                  >
+                    Принять
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="error"
+                    onClick={() => handleRejectApplication(app.id)}
+                    disabled={isLoading}
+                  >
+                    Отклонить
+                  </Button>
+                </>
+              )}
+            </Box>
+          ))}
+        </Box>
+      )}
+
       <MuiLink href={`/orders/${order.id}`} underline="none">
         Подробнее
       </MuiLink>
 
-      <div className="flex gap-2 mt-2">
+      <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap" }}>
         {userRole === "freelancer" &&
           order.status === "pending" &&
           !isCurrentUserOrder && (
@@ -176,34 +284,33 @@ export default function OrderCard({
               onClick={handleTakeOrder}
               disabled={isLoading}
             >
-              {isLoading ? "Загрузка..." : "Взять заказ"}
+              Взять заказ
             </Button>
           )}
 
-        {userRole === "client" &&
-          order.status === "in_progress" &&
-          isCurrentUserOrder && (
+        {isCurrentUserOrder && 
+          order.status === "waiting_confirmation" && (
             <Button
               variant="contained"
               color="primary"
               onClick={handleConfirmOrder}
               disabled={isLoading}
             >
-              {isLoading ? "Загрузка..." : "Подтвердить заказ"}
+              Подтвердить исполнителя
             </Button>
           )}
 
-        {isCurrentUserOrder && (
+        {isCurrentUserOrder && order.status === "pending" && (
           <Button
             variant="contained"
             color="error"
             onClick={handleDeleteOrder}
             disabled={isLoading}
           >
-            {isLoading ? "Загрузка..." : "Удалить заказ"}
+            Удалить
           </Button>
         )}
-      </div>
+      </Box>
     </Paper>
   );
 }

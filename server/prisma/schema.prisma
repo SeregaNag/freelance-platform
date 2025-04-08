@@ -7,16 +7,23 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum OrderStatus {
+  pending
+  waiting_confirmation
+  in_progress
+  completed
+}
+
 model Order {
   id          String   @id @default(uuid())
   title       String
   description String
   price       Float
-  status      String   @default("pending")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status      OrderStatus @default(pending)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
- customerId  String
+  customerId  String
   customer    User     @relation("CustomerOrders", fields: [customerId], references: [id])
   
   freelancerId String? 
