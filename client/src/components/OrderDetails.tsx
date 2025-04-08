@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Typography, Button } from "@mui/material";
 import { Order } from "@/types/order";
 import { getOrder } from "@/api/api";
