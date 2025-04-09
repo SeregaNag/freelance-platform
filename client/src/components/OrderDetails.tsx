@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Stack } from "@mui/material";
 import { Order } from "@/types/order";
 import { getOrder } from "@/api/api";
 import { useRouter } from "next/navigation";
@@ -38,6 +38,10 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
     }
   };
 
+  const handleOpenChat = () => {
+    router.push(`/chat?orderId=${order.id}`);
+  };
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
@@ -53,14 +57,25 @@ export default function OrderDetails({ order }: OrderDetailsProps) {
         Статус: {order.status}
       </Typography>
 
-      {role === "client" && order.status === "in_progress" && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleConfirmOrder}
-        >
-          Подтвердить заказ
-        </Button>
+      {order.status === "in_progress" && (
+        <Stack direction="row" spacing={2}>
+          {role === "client" && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleConfirmOrder}
+            >
+              Подтвердить заказ
+            </Button>
+          )}
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleOpenChat}
+          >
+            Открыть чат
+          </Button>
+        </Stack>
       )}
     </Box>
   );

@@ -6,15 +6,26 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class WsAuthMiddleware {
     use(socket: Socket, next: (err?: Error) => void) {
-            const token = socket.handshake.auth.token ||  socket.handshake.headers.cookie?.split('=')[1];
-            if (!token) return next(new Error("Unauthorized"));
+        const token = socket.handshake.auth.token || 
+                     socket.handshake.headers.cookie?.split('; ')
+                        .find(row => row.startsWith('access_token='))?.split('=')[1];
         
-            try {
-                const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-                socket.data.user = decoded;
-                next();
-            } catch (error) {
-                return next(new Error("Unauthorized"));
-            }
+        console.log('Middleware - Auth token:', token);
+        console.log('Middleware - Cookies:', socket.handshake.headers.cookie);
+        
+        if (!token) {
+            console.log('Middleware - No token found');
+            return next(new Error("Unauthorized"));
+        }
+        
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+            console.log('Middleware - Token decoded:', decoded);
+            socket.data.user = decoded;
+            next();
+        } catch (error) {
+            console.log('Middleware - Token verification failed:', error);
+            return next(new Error("Unauthorized"));
+        }
     }
 }

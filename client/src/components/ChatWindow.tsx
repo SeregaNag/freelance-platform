@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { ChatState } from "../types/message";
-import { TextField, Button, Box, Typography, Paper, List, ListItem, ListItemText, Chip } from "@mui/material";
+import { TextField, Button, Box, Typography, Paper, List, ListItem, ListItemText, Chip, CircularProgress } from "@mui/material";
 import { useState } from "react";
 import useSocket from "@/hooks/useSocket";
 
@@ -11,12 +11,20 @@ interface ChatWindowProps {
 export default function ChatWindow({ orderId }: ChatWindowProps) {
     const { messages, isConnected } = useSelector((state: { chat: ChatState }) => state.chat);
     const [message, setMessage] = useState('');
+    const [isSending, setIsSending] = useState(false);
     const { sendMessage: sendSocketMessage } = useSocket(orderId);
 
-    const handleSendMessage = () => {
-        if (message.trim() && isConnected) {
-            sendSocketMessage(message);
-            setMessage('');
+    const handleSendMessage = async () => {
+        if (message.trim() && isConnected && !isSending) {
+            try {
+                setIsSending(true);
+                await sendSocketMessage(message);
+                setMessage('');
+            } catch (error) {
+                console.error('Error sending message:', error);
+            } finally {
+                setIsSending(false);
+            }
         }
     }
 
@@ -51,7 +59,7 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     fullWidth
-                    disabled={!isConnected}
+                    disabled={!isConnected || isSending}
                     onKeyPress={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
@@ -62,9 +70,9 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
                 <Button 
                     variant="contained" 
                     onClick={handleSendMessage}
-                    disabled={!isConnected || !message.trim()}
+                    disabled={!isConnected || !message.trim() || isSending}
                 >
-                    Send
+                    {isSending ? <CircularProgress size={24} /> : 'Send'}
                 </Button>
             </Box>
         </Box>
