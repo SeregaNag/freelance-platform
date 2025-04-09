@@ -9,44 +9,10 @@ export default function useSocket(orderId: string) {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
-        console.log('Token from cookie:', token);
-        
-        // Загружаем историю сообщений
-        const loadMessages = async () => {
-            try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/chat/messages/${orderId}`, {
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('Error loading messages:', errorData);
-                    throw new Error(errorData.message || 'Failed to load messages');
-                }
-                
-                const messages = await response.json();
-                console.log('Loaded messages:', messages);
-                dispatch(getMessages(messages));
-            } catch (error) {
-                console.error('Error loading messages:', error);
-            }
-        };
-
-        if (orderId) {
-            loadMessages();
-        }
-        
         socketRef.current = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000', {
             path: '/chat',
             withCredentials: true,
-            transports: ['websocket', 'polling'],
-            auth: {
-                token: token
-            },
+            transports: ['polling', 'websocket'],
             reconnection: true,
             reconnectionAttempts: 5,
             reconnectionDelay: 1000
@@ -55,6 +21,16 @@ export default function useSocket(orderId: string) {
         socketRef.current.on('connect', () => {
             console.log('Connected to socket');
             dispatch(setIsConnected(true));
+            
+            if (orderId) {
+                setTimeout(() => {
+                    console.log('Joining order:', orderId);
+                    socketRef.current?.emit('joinOrder', { orderId }, (messages: any) => {
+                        console.log('Received messages:', messages);
+                        dispatch(getMessages(messages));
+                    });
+                }, 1000);
+            }
         });
         
         socketRef.current.on('disconnect', (reason) => {
@@ -74,11 +50,6 @@ export default function useSocket(orderId: string) {
         socketRef.current.on('error', (error) => {
             console.error('Socket error:', error);
         });
-
-        if(orderId) {
-            console.log('Joining order:', orderId);
-            socketRef.current.emit('joinOrder', { orderId });
-        }
 
         return () => {
             if(socketRef.current) {
