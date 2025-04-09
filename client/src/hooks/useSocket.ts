@@ -66,6 +66,7 @@ export default function useSocket(orderId: string) {
                     console.error('Error sending message:', response.error);
                 } else {
                     console.log('Message sent successfully:', response);
+                    dispatch(sendMessage(response));
                 }
             });
         }

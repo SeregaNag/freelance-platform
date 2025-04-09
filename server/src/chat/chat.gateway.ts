@@ -19,16 +19,23 @@ import { ChatService } from './chat.service';
         credentials: true,
     },
     path: '/chat',
-    middleware: [WsAuthMiddleware],
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() server: Server;
-    constructor(private readonly chatService: ChatService) {}
+    constructor(
+        private readonly chatService: ChatService,
+        private readonly wsAuthMiddleware: WsAuthMiddleware
+    ) {}
+
+    afterInit() {
+        this.server.use((socket, next) => this.wsAuthMiddleware.use(socket, next));
+    }
     
     handleConnection(client: Socket) {
         console.log('Client connected:', client.id);
         console.log('Auth token:', client.handshake.auth.token);
         console.log('Cookies:', client.handshake.headers.cookie);
+        console.log('Client data:', client.data);
     }
 
     handleDisconnect(client: Socket) {
@@ -38,14 +45,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @UseGuards(WsJwtGuard)
     @SubscribeMessage('message')
     async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        console.log('Received message:', payload);
+        console.log('Received message payload:', payload);
+        console.log('Client data:', client.data);
         const userId = client.data.user.userId;
+        console.log('User ID:', userId);
+        
         const hasAccess = await this.chatService.checkOrderAccess(payload.orderId, userId);
         if (!hasAccess) {
             console.log('Access denied for user:', userId);
             throw new Error('Unauthorized');
         }
         
+        console.log('Creating message with data:', { ...payload, senderId: userId });
         const message = await this.chatService.createMessage(payload, userId);
         console.log('Created message:', message);
         this.server.to(`order:${payload.orderId}`).emit('message', message);
