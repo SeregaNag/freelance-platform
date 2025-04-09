@@ -15,10 +15,10 @@ import { ChatService } from './chat.service';
 
 @WebSocketGateway({
     cors: {
-        origin: process.env.CLIENT_URL || 'http://localhost:3000',
+        origin: process.env.CLIENT_URL || 'http://localhost:3001',
         credentials: true,
     },
-    namespace: 'chat',
+    path: '/chat',
     middlewares: [WsAuthMiddleware],
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
