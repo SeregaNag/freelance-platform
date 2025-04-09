@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import { setIsConnected, setOrderId, sendMessage } from "@/features/chatSlice";
+import { setIsConnected, setOrderId, sendMessage, getMessages } from "@/features/chatSlice";
 import { Message } from "@/types/message";
 import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
@@ -12,12 +12,44 @@ export default function useSocket(orderId: string) {
         const token = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1];
         console.log('Token from cookie:', token);
         
+        // Загружаем историю сообщений
+        const loadMessages = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/chat/messages/${orderId}`, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Error loading messages:', errorData);
+                    throw new Error(errorData.message || 'Failed to load messages');
+                }
+                
+                const messages = await response.json();
+                console.log('Loaded messages:', messages);
+                dispatch(getMessages(messages));
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        };
+
+        if (orderId) {
+            loadMessages();
+        }
+        
         socketRef.current = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000', {
             path: '/chat',
             withCredentials: true,
+            transports: ['websocket', 'polling'],
             auth: {
                 token: token
-            }
+            },
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
         });
 
         socketRef.current.on('connect', () => {
