@@ -7,29 +7,53 @@ export class ChatService {
     constructor(private prisma: PrismaService) {}
 
     async createMessage(createMessageDto: CreateMessageDto, senderId: string) {
-       return this.prisma.message.create({
-        data: {
-            content: createMessageDto.content,
-            orderId: createMessageDto.orderId,
-            senderId,
-        },
-        include: {
-            sender: true,
-        },
-       })
+        try {
+            return await this.prisma.message.create({
+                data: {
+                    content: createMessageDto.content,
+                    orderId: createMessageDto.orderId,
+                    senderId,
+                },
+                include: {
+                    sender: true,
+                },
+            });
+        } catch (error) {
+            throw new Error('Failed to create message');
+        }
     }
 
     async getMessagesByOrderId(orderId: string) {
-        return this.prisma.message.findMany({
+        try {
+            return await this.prisma.message.findMany({
+                where: {
+                    orderId,
+                },
+                include: {
+                    sender: true,
+                },
+                orderBy: {
+                    createdAt: 'asc',
+                },
+            });
+        } catch (error) {
+            throw new Error('Failed to get messages');
+        }
+    }
+
+    async checkOrderAccess(orderId: string, userId: string) {
+        const order = await this.prisma.order.findUnique({
             where: {
-                orderId,
+                id: orderId,
             },
-            include: {
-                sender: true,
-            },
-            orderBy: {
-                createdAt: 'asc',
-            },
+            select: { customerId: true, freelancerId: true },
         });
+        if (!order) {
+            throw new Error('Order not found');
+        }
+        if (order.customerId !== userId && order.freelancerId !== userId) {
+            throw new Error('Unauthorized');
+        }
+        return order?.customerId === userId || order?.freelancerId === userId;
     }
 }
