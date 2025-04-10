@@ -1,8 +1,8 @@
 import { Socket } from "socket.io";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 import { Injectable } from "@nestjs/common";
 
-interface DecodedToken extends JwtPayload {
+interface DecodedToken extends jwt.JwtPayload {
     email: string;
     sub: string;
     roles: string[];
@@ -24,9 +24,14 @@ export class WsAuthMiddleware {
             console.log('Middleware - No token found');
             return next(new Error("Unauthorized"));
         }
+
+        if (!process.env.JWT_SECRET) {
+            console.error('Middleware - JWT_SECRET is not defined');
+            return next(new Error("Server configuration error"));
+        }
         
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as DecodedToken;
+            const decoded = jwt.verify(token, process.env.JWT_SECRET) as DecodedToken;
             console.log('Middleware - Token decoded:', decoded);
             socket.data = {
                 user: {
