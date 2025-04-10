@@ -16,32 +16,39 @@ export default function Home() {
 
   useEffect(() => {
     setCurrentRole(role);
-  }
-    , [role]);
+  }, [role]);
 
   return (
     <Container maxWidth="md" sx={{ textAlign: "center", mt: 5 }}>
       <Typography variant="h2" gutterBottom>
-        {role === 'client' ? 'Создайте новый заказ' : 'Найдите подходящие проекты'}
+        {role === "client"
+          ? "Создайте новый заказ"
+          : "Найдите подходящие проекты"}
       </Typography>
 
       <RoleSwitch />
 
-      {role === 'client' && 
-      <>
-      <Button
-        variant="contained"
-        color="secondary"
-        sx={{ mt: 3 }}
-        onClick={() => setIsModalOpen(true)}
-      >
-        Разместить заказ
-      </Button>
-      
-      <ModalWindow isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}> <CreateOrderForm onClose={() => setIsModalOpen(false)}/></ModalWindow>
-      </>
-      }
-      {currentRole === 'freelancer' && <OrderList />}
+      {role === "client" && (
+        <>
+          <Button
+            variant="contained"
+            color="secondary"
+            sx={{ mt: 3 }}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Разместить заказ
+          </Button>
+
+          <ModalWindow
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          >
+            {" "}
+            <CreateOrderForm onClose={() => setIsModalOpen(false)} />
+          </ModalWindow>
+        </>
+      )}
+      <OrderList role={currentRole} />
     </Container>
   );
 }
