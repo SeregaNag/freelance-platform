@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Box, Button, TextField } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
 import { createOrder } from "@/api/api";
+import { useDispatch } from "react-redux";
+import { orderModified } from "@/features/ordersSlice";
 
 interface CreateOrderFormProps {
   onClose: () => void;
@@ -11,6 +13,7 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState(0);
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,6 +22,7 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
       enqueueSnackbar(`Заказ "${newOrder.title}" успешно создан`, {
         variant: "success",
       });
+      dispatch(orderModified(newOrder.id));
     } catch (error) {
       enqueueSnackbar(
         `Ошибка при создании заказа ${(error as Error).message}`,

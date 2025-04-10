@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Patch,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -31,7 +32,7 @@ export class OrdersController {
   }
 
   @Get(':id')
-  findOne(id: string) {
+  findOne(@Param('id') id: string) {
     return this.ordersService.findOne(id);
   }
 
@@ -43,5 +44,19 @@ export class OrdersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.ordersService.remove(id);
+  }
+
+  @Post(':id/take')
+  @UseGuards(JwtAuthGuard)
+  async takeOrder(@Param('id') id: string, @Req() req: Request) {
+    const freelancerId = (req as any).user.userId;
+    return this.ordersService.takeOrder(id, freelancerId);
+  }
+
+  @Post(':id/confirm')
+  @UseGuards(JwtAuthGuard)
+  async confirmOrder(@Param('id') id: string, @Req() req: Request) {
+    const customerId = (req as any).user.userId;
+    return this.ordersService.confirmOrder(id, customerId);
   }
 }

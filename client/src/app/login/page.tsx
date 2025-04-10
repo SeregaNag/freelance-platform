@@ -1,37 +1,49 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Container, Typography, TextField, Button, Box } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { setProfile } from "@/features/profileSlice";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const dispatch = useDispatch();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/login", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email, password }),
       });
+
       if (!res.ok) {
-        setError(res.statusText);
+        throw new Error("Неверные учетные данные");
       }
+
+      // Получаем профиль после успешного входа
+      const profileRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (profileRes.ok) {
+        const profileData = await profileRes.json();
+        dispatch(setProfile(profileData));
+      }
+
       router.push("/");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "Ошибка авторизации");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ошибка при входе");
     }
   };
 
@@ -55,8 +67,8 @@ export default function LoginPage() {
           name="email"
           type="email"
           margin="normal"
-          value={formData.email}
-          onChange={handleChange}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
           fullWidth
@@ -64,8 +76,8 @@ export default function LoginPage() {
           name="password"
           type="password"
           margin="normal"
-          value={formData.password}
-          onChange={handleChange}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
         <Button
           variant="contained"

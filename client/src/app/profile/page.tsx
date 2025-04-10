@@ -3,7 +3,8 @@
 import { UserProfile } from "@/types/profile";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Box, CircularProgress, Container, Typography } from "@mui/material";
+import { Box, Button, Container, Typography } from "@mui/material";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -39,14 +40,7 @@ export default function ProfilePage() {
   }, [router]);
 
   if (loading) {
-    return (
-      <Container className="min-h-screen flex flex-col items-center justify-center">
-        <CircularProgress />
-        <Typography variant="h6" sx={{ mt: 2 }}>
-          Загрузка профиля...
-        </Typography>
-      </Container>
-    );
+    return <LoadingSpinner message="Загрузка профиля..." />;
   }
 
   if (error) {
@@ -67,23 +61,29 @@ export default function ProfilePage() {
       {profile && (
         <Box className="bg-white shadow-md rounded p-4 w-full max-w-md">
           <Typography variant="body1">
-            <strong>ID:</strong> {profile.id}
-          </Typography>
-          <Typography variant="body1">
             <strong>Email:</strong> {profile.email}
           </Typography>
           <Typography variant="body1">
             <strong>Имя:</strong> {profile.name || "Не указано"}
           </Typography>
-          <Typography variant="body1">
-            <strong>Роли:</strong> {profile.roles.join(", ")}
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            Создан: {new Date(profile.createdAt).toLocaleString()}
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            Обновлён: {new Date(profile.updatedAt).toLocaleString()}
-          </Typography>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={async () => {
+              try {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+                  method: "POST",
+                  credentials: "include",
+                });
+                router.push("/login");
+              } catch (error) {
+                console.error("Ошибка при выходе:", error);
+              }
+            }}
+            sx={{ mt: 2 }}
+          >
+            Выйти из аккаунта
+          </Button>
         </Box>
       )}
     </Container>
