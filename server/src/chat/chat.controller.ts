@@ -34,4 +34,13 @@ export class ChatController {
         }
         return this.chatService.createMessage(createMessageDto, userId);
     }
+
+    @Post(':orderId/messages/read')
+    async markMessagesAsRead(
+        @Param('orderId') orderId: string,
+        @Req() req: RequestWithUser,
+    ) {
+        const userId = req.user.userId;
+        return this.chatService.markMessagesAsRead(orderId, userId);
+    }
 } 
