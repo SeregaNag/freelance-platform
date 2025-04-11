@@ -20,8 +20,11 @@ model Message {
   orderId   String
   order     Order    @relation(fields: [orderId], references: [id])
   senderId  String
-  sender    User     @relation(fields: [senderId], references: [id])
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId String
+  receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   createdAt DateTime @default(now())
+  isRead    Boolean  @default(false)
 }
 
 model Order {
@@ -53,5 +56,6 @@ model User {
 
   customerOrders   Order[] @relation("CustomerOrders")
   freelancerOrders Order[] @relation("FreelancerOrders")
-  sentMessages     Message[]
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
 }
