@@ -1,13 +1,17 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ChatState } from "../types/message";
 import { Message } from "../types/message";
+
+interface ChatState {
+    messages: Message[];
+    isConnected: boolean;
+    orderId: string | null;
+}
 
 const initialState: ChatState = {
     messages: [],
-    orderId: null,
     isConnected: false,
-    unreadCount: 0,
-}
+    orderId: null,
+};
 
 const chatSlice = createSlice({
     name: 'chat',
@@ -15,26 +19,24 @@ const chatSlice = createSlice({
     reducers: {
         getMessages: (state, action: PayloadAction<Message[]>) => {
             state.messages = action.payload;
-            state.unreadCount = action.payload.filter(msg => msg.status === 'SENT').length;
-        },
-        setOrderId: (state, action: PayloadAction<string>) => {
-            state.orderId = action.payload;
         },
         sendMessage: (state, action: PayloadAction<Message>) => {
             state.messages.push(action.payload);
-            if (action.payload.status === 'SENT') {
-                state.unreadCount++;
-            }
-        },
-        markMessagesAsRead: (state) => {
-            state.messages = state.messages.map(msg => ({ ...msg, status: 'READ' }));
-            state.unreadCount = 0;
         },
         setIsConnected: (state, action: PayloadAction<boolean>) => {
             state.isConnected = action.payload;
         },
+        setOrderId: (state, action: PayloadAction<string>) => {
+            state.orderId = action.payload;
+        },
+        markMessagesAsRead: (state) => {
+            state.messages = state.messages.map(message => ({
+                ...message,
+                status: 'READ'
+            }));
+        },
     },
-})
+});
 
-export const { getMessages, setOrderId, sendMessage, markMessagesAsRead, setIsConnected } = chatSlice.actions;
+export const { getMessages, sendMessage, setIsConnected, setOrderId, markMessagesAsRead } = chatSlice.actions;
 export default chatSlice.reducer;

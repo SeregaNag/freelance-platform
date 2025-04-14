@@ -11,7 +11,7 @@ interface ChatWindowProps {
 }
 
 export default function ChatWindow({ orderId }: ChatWindowProps) {
-    const { messages, isConnected, unreadCount } = useSelector((state: { chat: ChatState }) => state.chat);
+    const { messages, isConnected } = useSelector((state: { chat: ChatState }) => state.chat);
     const [message, setMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
     const { sendSocketMessage } = useSocket(orderId);
@@ -47,15 +47,6 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
                 >
                     <Typography variant="body2">Status</Typography>
                 </Badge>
-                {unreadCount > 0 && (
-                    <Badge 
-                        badgeContent={unreadCount} 
-                        color="error"
-                        sx={{ ml: 2 }}
-                    >
-                        <Typography variant="body2">Непрочитанные сообщения</Typography>
-                    </Badge>
-                )}
             </Box>
             
             <Paper sx={{ flexGrow: 1, mb: 2, overflow: 'auto', p: 2 }}>
