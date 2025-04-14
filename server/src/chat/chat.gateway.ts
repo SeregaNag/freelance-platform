@@ -76,6 +76,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         
         client.join(`order:${payload.orderId}`);
         const messages = await this.chatService.getMessagesByOrderId(payload.orderId);
+        
+        // Помечаем сообщения как доставленные
+        await this.chatService.markMessagesAsDelivered(payload.orderId, userId);
+        
         return messages;
     }
 }

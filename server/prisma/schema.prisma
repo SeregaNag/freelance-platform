@@ -14,6 +14,12 @@ enum OrderStatus {
   completed
 }
 
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
 model Message {
   id    String @id @default(uuid())
   content   String
@@ -24,7 +30,7 @@ model Message {
   receiverId String
   receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   createdAt DateTime @default(now())
-  isRead    Boolean  @default(false)
+  status    MessageStatus @default(SENT)
 }
 
 model Order {

@@ -19,8 +19,7 @@ export class ChatService {
       }
 
       // Определяем получателя сообщения
-      const receiverId =
-        order.customerId === senderId ? order.freelancerId : order.customerId;
+      const receiverId = order.customerId === senderId ? order.freelancerId : order.customerId;
 
       if (!receiverId) {
         throw new Error('Receiver not found');
@@ -32,14 +31,16 @@ export class ChatService {
           orderId: createMessageDto.orderId,
           senderId,
           receiverId,
-          isRead: false, // По умолчанию сообщение непрочитанное
+          status: 'SENT',
         },
         include: {
           sender: true,
+          receiver: true,
         },
       });
     } catch (error) {
-      throw new Error('Failed to create message');
+      console.error('Error creating message:', error);
+      throw error;
     }
   }
 
@@ -51,6 +52,7 @@ export class ChatService {
         },
         include: {
           sender: true,
+          receiver: true,
         },
         orderBy: {
           createdAt: 'asc',
@@ -61,20 +63,21 @@ export class ChatService {
     }
   }
 
-  async checkOrderAccess(orderId: string, userId: string) {
-    const order = await this.prisma.order.findUnique({
-      where: {
-        id: orderId,
-      },
-      select: { customerId: true, freelancerId: true },
-    });
-    if (!order) {
-      throw new Error('Order not found');
+  async markMessagesAsDelivered(orderId: string, userId: string) {
+    try {
+      await this.prisma.message.updateMany({
+        where: {
+          orderId,
+          receiverId: userId,
+          status: 'SENT',
+        },
+        data: {
+          status: 'DELIVERED',
+        },
+      });
+    } catch (error) {
+      throw new Error('Failed to mark messages as delivered');
     }
-    if (order.customerId !== userId && order.freelancerId !== userId) {
-      throw new Error('Unauthorized');
-    }
-    return order?.customerId === userId || order?.freelancerId === userId;
   }
 
   async markMessagesAsRead(orderId: string, userId: string) {
@@ -82,15 +85,32 @@ export class ChatService {
       await this.prisma.message.updateMany({
         where: {
           orderId,
-          senderId: { not: userId }, // Помечаем как прочитанные только сообщения от других пользователей
-          isRead: false,
+          receiverId: userId,
+          status: { in: ['SENT', 'DELIVERED'] },
         },
         data: {
-          isRead: true,
+          status: 'READ',
         },
       });
     } catch (error) {
       throw new Error('Failed to mark messages as read');
+    }
+  }
+
+  async checkOrderAccess(orderId: string, userId: string): Promise<boolean> {
+    try {
+      const order = await this.prisma.order.findUnique({
+        where: { id: orderId },
+        select: { customerId: true, freelancerId: true },
+      });
+
+      if (!order) {
+        return false;
+      }
+
+      return order.customerId === userId || order.freelancerId === userId;
+    } catch (error) {
+      return false;
     }
   }
 }

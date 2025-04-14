@@ -1,9 +1,10 @@
 import { useSelector, useDispatch } from "react-redux";
 import { ChatState } from "../types/message";
-import { TextField, Button, Box, Typography, Paper, List, ListItem, ListItemText, Chip, CircularProgress, Badge } from "@mui/material";
+import { TextField, Button, Box, Typography, Paper, CircularProgress, Badge } from "@mui/material";
 import { useState, useEffect } from "react";
 import useSocket from "@/hooks/useSocket";
 import { markMessagesAsRead } from "@/features/chatSlice";
+import { Message } from "./Message";
 
 interface ChatWindowProps {
     orderId: string;
@@ -13,7 +14,7 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
     const { messages, isConnected, unreadCount } = useSelector((state: { chat: ChatState }) => state.chat);
     const [message, setMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
-    const { sendMessage: sendSocketMessage } = useSocket(orderId);
+    const { sendSocketMessage } = useSocket(orderId);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -21,30 +22,32 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
         dispatch(markMessagesAsRead());
     }, [dispatch]);
 
-    const handleSendMessage = async () => {
-        if (message.trim() && isConnected && !isSending) {
-            try {
-                setIsSending(true);
-                await sendSocketMessage(message);
-                setMessage('');
-            } catch (error) {
-                console.error('Error sending message:', error);
-            } finally {
-                setIsSending(false);
-            }
+    const handleSendMessage = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!message.trim() || isSending) return;
+
+        setIsSending(true);
+        try {
+            await sendSocketMessage(message);
+            setMessage('');
+        } catch (error) {
+            console.error('Error sending message:', error);
+        } finally {
+            setIsSending(false);
         }
-    }
+    };
 
     return (
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6">Chat</Typography>
-                <Chip 
-                    label={isConnected ? "Connected" : "Disconnected"} 
+                <Badge 
+                    badgeContent={isConnected ? "✓" : "✗"} 
                     color={isConnected ? "success" : "error"}
-                    size="small"
                     sx={{ ml: 2 }}
-                />
+                >
+                    <Typography variant="body2">Status</Typography>
+                </Badge>
                 {unreadCount > 0 && (
                     <Badge 
                         badgeContent={unreadCount} 
@@ -56,21 +59,10 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
                 )}
             </Box>
             
-            <Paper sx={{ flexGrow: 1, mb: 2, overflow: 'auto' }}>
-                <List>
-                    {messages.map((msg) => (
-                        <ListItem key={msg.id}>
-                            <ListItemText
-                                primary={msg.content}
-                                secondary={`${msg.sender.name} - ${new Date(msg.createdAt).toLocaleString()}`}
-                                sx={{ 
-                                    opacity: msg.isRead ? 1 : 0.8,
-                                    fontWeight: msg.isRead ? 'normal' : 'bold'
-                                }}
-                            />
-                        </ListItem>
-                    ))}
-                </List>
+            <Paper sx={{ flexGrow: 1, mb: 2, overflow: 'auto', p: 2 }}>
+                {messages.map((msg) => (
+                    <Message key={msg.id} message={msg} />
+                ))}
             </Paper>
 
             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -83,7 +75,7 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
                     onKeyPress={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
-                            handleSendMessage();
+                            handleSendMessage(e);
                         }
                     }}
                 />

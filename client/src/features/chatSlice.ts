@@ -15,19 +15,19 @@ const chatSlice = createSlice({
     reducers: {
         getMessages: (state, action: PayloadAction<Message[]>) => {
             state.messages = action.payload;
-            state.unreadCount = action.payload.filter(msg => !msg.isRead).length;
+            state.unreadCount = action.payload.filter(msg => msg.status === 'SENT').length;
         },
         setOrderId: (state, action: PayloadAction<string>) => {
             state.orderId = action.payload;
         },
         sendMessage: (state, action: PayloadAction<Message>) => {
             state.messages.push(action.payload);
-            if (!action.payload.isRead) {
+            if (action.payload.status === 'SENT') {
                 state.unreadCount++;
             }
         },
         markMessagesAsRead: (state) => {
-            state.messages = state.messages.map(msg => ({ ...msg, isRead: true }));
+            state.messages = state.messages.map(msg => ({ ...msg, status: 'READ' }));
             state.unreadCount = 0;
         },
         setIsConnected: (state, action: PayloadAction<boolean>) => {

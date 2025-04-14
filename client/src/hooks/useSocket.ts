@@ -25,7 +25,7 @@ export default function useSocket(orderId: string) {
             if (orderId) {
                 setTimeout(() => {
                     console.log('Joining order:', orderId);
-                    socketRef.current?.emit('joinOrder', { orderId }, (messages: any) => {
+                    socketRef.current?.emit('joinOrder', { orderId }, (messages: Message[]) => {
                         console.log('Received messages:', messages);
                         dispatch(getMessages(messages));
                     });
@@ -52,24 +52,27 @@ export default function useSocket(orderId: string) {
         });
 
         return () => {
-            if(socketRef.current) {
+            if (socketRef.current) {
                 socketRef.current.disconnect();
             }
-        }
+        };
     }, [orderId, dispatch]);
 
-    const sendMessageHandler = (content: string) => {
-        if(socketRef.current && orderId) {
-            console.log('Sending message:', { content, orderId });
-            socketRef.current.emit('message', { content, orderId }, (response: any) => {
-                if (response.error) {
-                    console.error('Error sending message:', response.error);
+    const sendSocketMessage = async (content: string) => {
+        if (!socketRef.current) {
+            throw new Error('Socket not connected');
+        }
+
+        return new Promise((resolve, reject) => {
+            socketRef.current?.emit('message', { orderId, content }, (response: Message) => {
+                if (response) {
+                    resolve(response);
                 } else {
-                    console.log('Message sent successfully:', response);
+                    reject(new Error('Failed to send message'));
                 }
             });
-        }
-    }
+        });
+    };
 
-    return { sendMessage: sendMessageHandler };
+    return { sendSocketMessage };
 }
