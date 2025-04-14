@@ -19,36 +19,23 @@ export default function useSocket(orderId: string) {
         });
 
         socketRef.current.on('connect', () => {
-            console.log('Connected to socket');
             dispatch(setIsConnected(true));
             
             if (orderId) {
                 setTimeout(() => {
-                    console.log('Joining order:', orderId);
                     socketRef.current?.emit('joinOrder', { orderId }, (messages: Message[]) => {
-                        console.log('Received messages:', messages);
                         dispatch(getMessages(messages));
                     });
                 }, 1000);
             }
         });
         
-        socketRef.current.on('disconnect', (reason) => {
-            console.log('Disconnected from socket:', reason);
+        socketRef.current.on('disconnect', () => {
             dispatch(setIsConnected(false));
         });
 
-        socketRef.current.on('connect_error', (error) => {
-            console.error('Connection error:', error);
-        });
-
         socketRef.current.on('message', (message: Message) => {
-            console.log('Received message:', message);
             dispatch(sendMessage(message));
-        });
-
-        socketRef.current.on('error', (error) => {
-            console.error('Socket error:', error);
         });
 
         return () => {

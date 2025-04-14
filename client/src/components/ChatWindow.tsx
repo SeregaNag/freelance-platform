@@ -18,7 +18,6 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        // Помечаем сообщения как прочитанные при открытии чата
         dispatch(markMessagesAsRead());
     }, [dispatch]);
 
