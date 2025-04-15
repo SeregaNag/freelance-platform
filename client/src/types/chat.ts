@@ -14,11 +14,4 @@ export interface Message {
         id: string;
         name: string;
     };
-}
-
-export interface ChatState {
-    messages: Message[];
-    orderId: string | null;
-    isConnected: boolean;
-    unreadCount: number;
-}
+} 
