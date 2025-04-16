@@ -3,6 +3,8 @@ import { PrismaService } from 'src/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateProfileDto } from './dto/update-profile.dto';  
+import { Express } from 'express';
+
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) { }

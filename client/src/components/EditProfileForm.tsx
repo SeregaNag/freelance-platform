@@ -56,7 +56,6 @@ export default function EditProfileForm({ profile, onSave, onCancel }: EditProfi
             setFormData(prev => ({
                 ...prev,
                 avatar: url
-
             }))
         } catch (error) {
             console.error("Ошибка при загрузке аватара", error);
@@ -65,6 +64,7 @@ export default function EditProfileForm({ profile, onSave, onCancel }: EditProfi
     }
     const handleSave = async () => {
         setIsSubmitting(true);
+        setError(null);
         try {
             await onSave(formData);
         } catch (error) {
