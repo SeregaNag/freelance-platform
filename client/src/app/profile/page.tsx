@@ -5,12 +5,35 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Box, Button, Container, Typography, Grid, Chip, Link } from "@mui/material";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import EditProfileForm from "@/components/EditProfileForm";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleSaveProfile = async (updatedProfile: UserProfile) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(updatedProfile),
+      });
+      if (!res.ok) {
+        throw new Error("Ошибка при сохранении профиля");
+      }
+      const data = await res.json();
+      setProfile(data);
+      setIsEditing(false);
+    } catch (error) {
+      setError("Ошибка при сохранении профиля");
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -58,15 +81,18 @@ export default function ProfilePage() {
       <Typography variant="h4" gutterBottom>
         Профиль пользователя
       </Typography>
-      {profile && (
+      {isEditing && profile ? (
+        <EditProfileForm profile={profile} onSave={handleSaveProfile} onCancel={() => setIsEditing(false)} />
+      ) : (
+        profile && (
         <Box className="bg-white shadow-md rounded p-6">
           <Grid container spacing={3}>
             <Grid item xs={12} md={4}>
               {profile.avatar && (
                 <Box className="mb-4">
-                  <img 
-                    src={profile.avatar} 
-                    alt="Аватар" 
+                  <img
+                    src={profile.avatar}
+                    alt="Аватар"
                     className="w-32 h-32 rounded-full object-cover"
                   />
                 </Box>
@@ -78,10 +104,10 @@ export default function ProfilePage() {
                 {profile.email}
               </Typography>
               {profile.isVerified && (
-                <Chip 
-                  label="Верифицирован" 
-                  color="success" 
-                  size="small" 
+                <Chip
+                  label="Верифицирован"
+                  color="success"
+                  size="small"
                   className="mt-2"
                 />
               )}
@@ -189,6 +215,14 @@ export default function ProfilePage() {
 
               <Button
                 variant="contained"
+                color="primary"
+                onClick={() => setIsEditing(true)}
+              >
+                Редактировать профиль
+              </Button>
+
+              <Button
+                variant="contained"
                 color="error"
                 onClick={async () => {
                   try {
@@ -207,7 +241,7 @@ export default function ProfilePage() {
             </Grid>
           </Grid>
         </Box>
-      )}
+      ))}
     </Container>
   );
 }
