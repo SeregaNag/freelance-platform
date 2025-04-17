@@ -2,12 +2,13 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { AppBar, Toolbar, Typography, Button } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store";
+import { RootState } from "@/store/store";
 import { setProfile } from "@/features/profileSlice";
+import Image from "next/image";
 
 export default function Header() {
   const router = useRouter();
@@ -78,13 +79,25 @@ export default function Header() {
                     : ""
                 }`}
               >
-                <Typography
-                  variant="h6"
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {profile.avatar && (
+                    <Box sx={{ position: 'relative', width: 32, height: 32 }}>
+                    <Image
+                        src={profile.avatar}
+                        alt="Аватар"
+                        fill
+                        style={{ objectFit: "cover", borderRadius: "50%" }}
+                      />
+                    </Box>
+                  )}
+                  <Typography
+                    variant="h6"
                   component="div"
                   sx={{ cursor: "pointer" }}
                 >
                   {profile.name || profile.email}
-                </Typography>
+                  </Typography>
+                </Box>
               </Link>
               <Button color="inherit" onClick={handleLogout}>
                 Выйти

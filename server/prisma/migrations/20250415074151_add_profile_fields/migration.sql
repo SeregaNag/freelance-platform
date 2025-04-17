@@ -1,0 +1,12 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "avatar" TEXT,
+ADD COLUMN     "bio" TEXT,
+ADD COLUMN     "completedOrders" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "experience" TEXT,
+ADD COLUMN     "isVerified" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "lastSeen" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "location" TEXT,
+ADD COLUMN     "rating" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "skills" TEXT[],
+ADD COLUMN     "socialLinks" JSONB,
+ADD COLUMN     "website" TEXT;
