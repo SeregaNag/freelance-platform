@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Box, Button, Container, Typography, Grid, Chip, Link } from "@mui/material";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import EditProfileForm from "@/components/EditProfileForm";
+import Image from 'next/image';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -90,10 +91,12 @@ export default function ProfilePage() {
             <Grid item xs={12} md={4}>
               {profile.avatar && (
                 <Box className="mb-4">
-                  <img
+                  <Image
                     src={profile.avatar}
                     alt="Аватар"
-                    className="w-32 h-32 rounded-full object-cover"
+                    width={128}
+                    height={128}
+                    className="rounded-full object-cover"
                   />
                 </Box>
               )}

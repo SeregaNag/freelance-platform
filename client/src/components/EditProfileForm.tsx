@@ -1,6 +1,7 @@
 import { UserProfile } from "@/types/profile";
 import { useState } from "react";
 import { Box, Button, Container, TextField, Typography, Grid, Chip, Link } from "@mui/material";
+import Image from 'next/image';
 
 interface EditProfileFormProps {
     profile: UserProfile;
@@ -100,10 +101,12 @@ export default function EditProfileForm({ profile, onSave, onCancel }: EditProfi
                         </Typography>
                         <Box className="flex items-center gap-4">
                             {formData.avatar && (
-                                <img
+                                <Image
                                     src={formData.avatar}
                                     alt="Аватар"
-                                    className="w-20 h-20 rounded-full object-cover"
+                                    width={80}
+                                    height={80}
+                                    className="rounded-full object-cover"
                                 />
                             )}
                             <Button

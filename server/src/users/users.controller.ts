@@ -55,7 +55,7 @@ export class UsersController {
   }))
   async uploadAvatar(@UploadedFile() file: Express.Multer.File, @Req() req) {
     const userId = req.user.userId;
-    const url = `/uploads/avatars/${file.filename}`;
+    const url = `${process.env.API_URL || 'http://localhost:3000'}/uploads/avatars/${file.filename}`;
     await this.usersService.updateProfile(userId, { avatar: url });
     return { url };
   }

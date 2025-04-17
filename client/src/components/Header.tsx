@@ -6,7 +6,7 @@ import { AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store";
+import { RootState } from "@/store/store";
 import { setProfile } from "@/features/profileSlice";
 
 export default function Header() {
