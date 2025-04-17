@@ -119,7 +119,7 @@ export default function ProfilePage() {
             <Grid item xs={12} md={8}>
               {profile.bio && (
                 <Box className="mb-4">
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography variant="h6" color="primary" fontWeight="bold" gutterBottom>
                     О себе
                   </Typography>
                   <Typography variant="body1">
@@ -130,7 +130,7 @@ export default function ProfilePage() {
 
               {profile.skills && profile.skills.length > 0 && (
                 <Box className="mb-4">
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography variant="h6" color="primary" fontWeight="bold" gutterBottom>
                     Навыки
                   </Typography>
                   <Box className="flex flex-wrap gap-2">
@@ -143,7 +143,7 @@ export default function ProfilePage() {
 
               {profile.experience && (
                 <Box className="mb-4">
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography variant="h6" color="primary" fontWeight="bold" gutterBottom>
                     Опыт работы
                   </Typography>
                   <Typography variant="body1">
@@ -154,7 +154,7 @@ export default function ProfilePage() {
 
               {profile.location && (
                 <Box className="mb-4">
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography variant="h6" color="primary" fontWeight="bold" gutterBottom>
                     Местоположение
                   </Typography>
                   <Typography variant="body1">
@@ -165,7 +165,7 @@ export default function ProfilePage() {
 
               {profile.website && (
                 <Box className="mb-4">
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography variant="h6" color="primary" fontWeight="bold" gutterBottom>
                     Веб-сайт
                   </Typography>
                   <Link href={profile.website} target="_blank">
@@ -176,7 +176,7 @@ export default function ProfilePage() {
 
               {profile.socialLinks && (
                 <Box className="mb-4">
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography variant="h6" color="primary" fontWeight="bold" gutterBottom>
                     Социальные сети
                   </Typography>
                   <Box className="flex flex-wrap gap-2">
@@ -205,7 +205,7 @@ export default function ProfilePage() {
               )}
 
               <Box className="mb-4">
-                <Typography variant="subtitle1" gutterBottom>
+                <Typography variant="h6" color="primary" fontWeight="bold" gutterBottom>
                   Статистика
                 </Typography>
                 <Typography variant="body1">
