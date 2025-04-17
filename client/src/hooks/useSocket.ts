@@ -19,57 +19,47 @@ export default function useSocket(orderId: string) {
         });
 
         socketRef.current.on('connect', () => {
-            console.log('Connected to socket');
             dispatch(setIsConnected(true));
             
             if (orderId) {
                 setTimeout(() => {
-                    console.log('Joining order:', orderId);
-                    socketRef.current?.emit('joinOrder', { orderId }, (messages: any) => {
-                        console.log('Received messages:', messages);
+                    socketRef.current?.emit('joinOrder', { orderId }, (messages: Message[]) => {
                         dispatch(getMessages(messages));
                     });
                 }, 1000);
             }
         });
         
-        socketRef.current.on('disconnect', (reason) => {
-            console.log('Disconnected from socket:', reason);
+        socketRef.current.on('disconnect', () => {
             dispatch(setIsConnected(false));
         });
 
-        socketRef.current.on('connect_error', (error) => {
-            console.error('Connection error:', error);
-        });
-
         socketRef.current.on('message', (message: Message) => {
-            console.log('Received message:', message);
             dispatch(sendMessage(message));
         });
 
-        socketRef.current.on('error', (error) => {
-            console.error('Socket error:', error);
-        });
-
         return () => {
-            if(socketRef.current) {
+            if (socketRef.current) {
                 socketRef.current.disconnect();
             }
-        }
+        };
     }, [orderId, dispatch]);
 
-    const sendMessageHandler = (content: string) => {
-        if(socketRef.current && orderId) {
-            console.log('Sending message:', { content, orderId });
-            socketRef.current.emit('message', { content, orderId }, (response: any) => {
-                if (response.error) {
-                    console.error('Error sending message:', response.error);
+    const sendSocketMessage = async (content: string) => {
+        if (!socketRef.current) {
+            throw new Error('Socket not connected');
+        }
+
+        return new Promise((resolve, reject) => {
+            socketRef.current?.emit('message', { orderId, content }, (response: Message) => {
+                if (response) {
+                    resolve(response);
                 } else {
-                    console.log('Message sent successfully:', response);
+                    reject(new Error('Failed to send message'));
                 }
             });
-        }
-    }
+        });
+    };
 
-    return { sendMessage: sendMessageHandler };
+    return { sendSocketMessage };
 }

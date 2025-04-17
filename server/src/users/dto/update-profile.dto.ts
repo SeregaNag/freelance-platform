@@ -1,17 +1,9 @@
-export interface UserProfile {
-  id: string;
-  email: string;
+export class UpdateProfileDto {
   name?: string;
-  roles: string[];
-  createdAt: string;
-  updatedAt: string;
-
   avatar?: string;
   bio?: string;
   skills?: string[];
   experience?: string;
-  rating?: number;
-  completedOrders?: number;
   location?: string;
   website?: string;
   socialLinks?: {
@@ -19,7 +11,5 @@ export interface UserProfile {
     linkedin?: string;
     twitter?: string;
     portfolio?: string;
-  };
-  isVerified?: boolean;
-  lastSeen?: string;
+  }
 }

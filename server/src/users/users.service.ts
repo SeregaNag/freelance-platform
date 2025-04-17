@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { UpdateProfileDto } from './dto/update-profile.dto';  
+import { Express } from 'express';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async register(createUserDto: CreateUserDto) {
     try {
@@ -41,11 +43,30 @@ export class UsersService {
         id: true,
         email: true,
         name: true,
+        avatar: true,
+        bio: true,
+        skills: true,
+        experience: true,
+        rating: true,
+        completedOrders: true,
+        location: true,
+        website: true,
+        socialLinks: true,
+        isVerified: true,
+        lastSeen: true,
         roles: true,
-        createdAt: true,
-        updatedAt: true,
       },
     });
     return user;
+  }
+
+  async updateProfile(userId: string, updateData: UpdateProfileDto) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...updateData,
+        updatedAt: new Date(),
+      }
+    })
   }
 }
