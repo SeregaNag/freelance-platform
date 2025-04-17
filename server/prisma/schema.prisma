@@ -42,12 +42,19 @@ model Order {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
+  category    String?    // Категория заказа
+  deadline    DateTime?  // Срок выполнения
+  skills      String[]   // Требуемые навыки
+  minBudget   Float?     // Минимальный бюджет
+  maxBudget   Float?     // Максимальный бюджет
+  attachments String[]   // Файлы/вложения
+  rating      Float?     // Рейтинг после завершения
+  review      String?    // Отзыв после завершения 
+
   customerId  String
   customer    User     @relation("CustomerOrders", fields: [customerId], references: [id])
-  
   freelancerId String? 
   freelancer   User?    @relation("FreelancerOrders", fields: [freelancerId], references: [id])
-
   messages    Message[]
 }
 
