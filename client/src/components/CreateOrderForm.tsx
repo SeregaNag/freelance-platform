@@ -42,11 +42,11 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState(0);
-  const [category, setCategory] = useState<string>("");
+  const [category, setCategory] = useState<string>("web");
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [skills, setSkills] = useState<string[]>([]);
-  const [minBudget, setMinBudget] = useState<number | undefined>();
-  const [maxBudget, setMaxBudget] = useState<number | undefined>();
+  const [minBudget, setMinBudget] = useState<number>(0);
+  const [maxBudget, setMaxBudget] = useState<number>(0);
   const [attachments, setAttachments] = useState<string[]>([]);
   const dispatch = useDispatch();
 
@@ -105,9 +105,7 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             label="Категория"
-            defaultValue=""
           >
-            <MenuItem value="">Выберите категорию</MenuItem>
             <MenuItem value="web">Веб-разработка</MenuItem>
             <MenuItem value="mobile">Мобильная разработка</MenuItem>
             <MenuItem value="design">Дизайн</MenuItem>
@@ -147,7 +145,7 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
         <TextField
           label="Минимальный бюджет"
           type="number"
-          value={minBudget}
+          value={minBudget || 0}
           onChange={(e) => setMinBudget(Number(e.target.value))}
           fullWidth
         />
@@ -155,7 +153,7 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
         <TextField
           label="Максимальный бюджет"
           type="number"
-          value={maxBudget}
+          value={maxBudget || 0}
           onChange={(e) => setMaxBudget(Number(e.target.value))}
           fullWidth
         />
