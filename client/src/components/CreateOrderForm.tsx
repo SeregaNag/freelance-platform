@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Button, TextField, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import { Box, Button, TextField, Select, MenuItem, FormControl, InputLabel, List, ListItem, ListItemText, IconButton } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { enqueueSnackbar } from "notistack";
 import { createOrder } from "@/api/api";
@@ -77,6 +77,18 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
     }
     onClose();
   };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if(files) {
+      const fileNames = Array.from(files).map(file => file.name);
+      setAttachments(prev => [...prev, ...fileNames]);
+    }
+  }
+
+  const handleDeleteFile = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -166,6 +178,10 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
           fullWidth
           required
         />
+
+        <Box>
+          <input accept="/*" />
+        </Box>
 
         <Button variant="contained" color="primary" type="submit">
           Создать
