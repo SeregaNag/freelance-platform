@@ -13,6 +13,12 @@ export interface Order {
   description: string;
   price: number;
   status: OrderStatus;
+  category?: string;
+  deadline?: string;
+  skills?: string[];
+  minBudget?: number;
+  maxBudget?: number;
+  attachments?: string[];
   customer?: UserProfile;
   freelancer?: UserProfile;
   applications?: OrderApplication[];

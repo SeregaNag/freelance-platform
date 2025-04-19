@@ -6,6 +6,12 @@ export async function createOrder(order: {
   title: string;
   description: string;
   price: number;
+  category?: string;
+  deadline?: string;
+  skills?: string[];
+  minBudget?: number;
+  maxBudget?: number;
+  attachments?: string[];
 }): Promise<Order> {
   const response = await fetch(`${API_URL}/orders`, {
     method: "POST",

@@ -14,6 +14,17 @@ export class OrdersService {
         title: createOrderDto.title,
         description: createOrderDto.description,
         price: createOrderDto.price,
+        status: createOrderDto.status || 'pending',
+        category: createOrderDto.category,
+        deadline: createOrderDto.deadline,
+        skills: {
+          set: createOrderDto.skills || []
+        },
+        minBudget: createOrderDto.minBudget,
+        maxBudget: createOrderDto.maxBudget,
+        attachments: {
+          set: createOrderDto.attachments || []
+        },
         customer: {
           connect: { id: createOrderDto.customerId },
         },
@@ -28,6 +39,7 @@ export class OrdersService {
     return this.prisma.order.findMany({
       include: {
         customer: true,
+        freelancer: true,
       },
     });
   }
