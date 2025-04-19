@@ -3,4 +3,10 @@ export class CreateOrderDto {
   description: string;
   price: number;
   status?: 'pending' | 'in_progress' | 'completed';
+  category?: string;
+  deadline?: Date;
+  skills?: string[];
+  minBudget?: number;
+  maxBudget?: number;
+  attachments?: string[];
 }
