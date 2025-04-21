@@ -8,6 +8,8 @@ import { orderModified } from "@/features/ordersSlice";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { Autocomplete, Chip } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 
 const SKILLS = [
   'JavaScript',
@@ -180,8 +182,37 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
         />
 
         <Box>
-          <input accept="/*" />
+          <input 
+          accept="/*" 
+          style={{ display: 'none' }}
+          id="raised-button-file"
+          multiple
+          type="file"
+          onChange={handleFileUpload}
+          />
+          <label htmlFor="raised-button-file">
+            <Button variant="contained" color="primary" component="span">
+              Загрузить файлы
+            </Button>
+          </label>
         </Box>
+
+        {attachments.length > 0 && (
+  <List>
+    {attachments.map((file, index) => (
+      <ListItem
+        key={index}
+        secondaryAction={
+          <IconButton edge="end" onClick={() => handleDeleteFile(index)}>
+            <DeleteIcon />
+          </IconButton>
+        }
+      >
+        <ListItemText primary={file} />
+      </ListItem>
+    ))}
+  </List>
+)}
 
         <Button variant="contained" color="primary" type="submit">
           Создать
