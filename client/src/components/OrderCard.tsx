@@ -5,6 +5,13 @@ import {
   Typography,
   Chip,
   Box,
+  Card,
+  CardContent,
+  CardActions,
+  Stack,
+  Avatar,
+  Grid,
+  Divider,
 } from "@mui/material";
 import { Order, OrderStatus, OrderApplication } from "@/types/order";
 import { UserRole } from "@/types/roles";
@@ -13,6 +20,8 @@ import { useState } from "react";
 import { UserProfile } from "@/types/profile";
 import { useDispatch } from "react-redux";
 import { orderModified } from "@/features/ordersSlice";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 
 const getStatusText = (status: OrderStatus): string => {
   switch (status) {
@@ -28,6 +37,17 @@ const getStatusText = (status: OrderStatus): string => {
       return "Отменен";
     default:
       return status;
+  }
+};
+
+const getStatusColor = (status: OrderStatus) => {
+  switch(status) {
+    case "completed": return "success";
+    case "in_progress": return "primary";
+    case "waiting_confirmation": return "warning";
+    case "cancelled": return "error";
+    case "pending": return "info";
+    default: return "default";
   }
 };
 
@@ -53,19 +73,6 @@ export default function OrderCard({
   const hasApplied = order.applications?.some(
     (app) => app.freelancer.id === currentUser?.id
   );
-
-  const statusColor =
-    order.status === "completed"
-      ? "green"
-      : order.status === "pending"
-      ? "yellow"
-      : order.status === "cancelled"
-      ? "grey"
-      : order.status === "in_progress"
-      ? "blue"
-      : order.status === "waiting_confirmation"
-      ? "orange"
-      : "black";
 
   const handleTakeOrder = async () => {
     try {
@@ -195,22 +202,47 @@ export default function OrderCard({
     }
   };
 
+  const navigateToDetails = () => {
+    router.push(`/orders/${order.id}`);
+  };
+
+  // Формат даты
+  const formattedDate = format(new Date(order.createdAt), 'dd MMM', { locale: ru });
+
   return (
-    <Paper
-      elevation={3}
-      sx={{
-        p: 2,
-        mb: 2,
-        border: isCurrentUserOrder ? "2px solid #4CAF50" : "none",
-        position: "relative",
+    <Card 
+      sx={{ 
+        mb: 3, 
+        cursor: 'pointer', 
+        transition: 'all 0.3s ease',
+        borderRadius: 2,
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+        '&:hover': {
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+          transform: 'translateY(-4px)'
+        },
+        border: isCurrentUserOrder 
+          ? '2px solid #4CAF50' 
+          : isCurrentUserFreelancer 
+            ? '2px solid #2196F3' 
+            : '1px solid #e0e0e0',
+        overflow: 'visible',
+        position: 'relative'
       }}
+      onClick={navigateToDetails}
     >
       {isCurrentUserOrder && (
         <Chip
           label="Ваш заказ"
           color="success"
           size="small"
-          sx={{ position: "absolute", top: 8, right: 8 }}
+          sx={{ 
+            position: "absolute", 
+            top: -10, 
+            right: 16, 
+            fontWeight: 'bold',
+            zIndex: 1 
+          }}
         />
       )}
       {isCurrentUserFreelancer && (
@@ -218,99 +250,171 @@ export default function OrderCard({
           label="Вы исполнитель"
           color="primary"
           size="small"
-          sx={{ position: "absolute", top: 8, right: 8 }}
+          sx={{ 
+            position: "absolute", 
+            top: -10, 
+            right: 16, 
+            fontWeight: 'bold',
+            zIndex: 1 
+          }}
         />
       )}
 
-      <Typography variant="h5">{order.title}</Typography>
-      <Typography variant="subtitle1">Цена: {order.price}</Typography>
-
-      <Typography variant="subtitle2" color={statusColor}>
-        Статус: {getStatusText(order.status)}
-      </Typography>
-
-      {order.customer && (
-        <Typography variant="body2">
-          Заказчик: {order.customer.name || order.customer.email}
-        </Typography>
-      )}
-
-      {order.applications && order.applications.length > 0 && (
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle2">Заявки:</Typography>
-          {order.applications.map((app) => (
-            <Box key={app.id} sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-              <Typography variant="body2">
-                {app.freelancer.name || app.freelancer.email}
+      <CardContent sx={{ p: 3 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h5" component="div" fontWeight="bold" sx={{ mb: 1 }}>
+                {order.title}
               </Typography>
-              {isCurrentUserOrder && order.status === "pending" && (
-                <>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="success"
-                    onClick={() => handleAcceptApplication(app.id)}
-                    disabled={isLoading}
-                  >
-                    Принять
-                  </Button>
-                  <Button
-                    size="small"
+              <Chip 
+                label={getStatusText(order.status)} 
+                color={getStatusColor(order.status)} 
+                size="medium"
+                sx={{ fontWeight: 'medium' }}
+              />
+            </Box>
+            
+            <Typography 
+              variant="body2" 
+              color="text.secondary" 
+              sx={{ 
+                mb: 2, 
+                display: '-webkit-box', 
+                WebkitLineClamp: 2, 
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                height: '2.5em'
+              }}
+            >
+              {order.description}
+            </Typography>
+            
+            {order.skills && order.skills.length > 0 && (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
+                {order.skills.slice(0, 3).map((skill, index) => (
+                  <Chip 
+                    key={index} 
+                    label={skill} 
+                    variant="outlined" 
+                    size="small" 
+                    color="primary"
+                  />
+                ))}
+                {order.skills.length > 3 && (
+                  <Chip 
+                    label={`+${order.skills.length - 3}`} 
+                    size="small" 
                     variant="outlined"
-                    color="error"
-                    onClick={() => handleRejectApplication(app.id)}
-                    disabled={isLoading}
-                  >
-                    Отклонить
-                  </Button>
-                </>
+                  />
+                )}
+              </Box>
+            )}
+          </Grid>
+        </Grid>
+        
+        <Divider sx={{ my: 2 }} />
+        
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {order.customer?.avatar ? (
+                <Avatar 
+                  src={order.customer.avatar} 
+                  alt={order.customer.name || ''} 
+                  sx={{ width: 32, height: 32, mr: 1 }}
+                />
+              ) : (
+                <Avatar 
+                  sx={{ width: 32, height: 32, mr: 1, bgcolor: 'primary.main' }}
+                >
+                  {(order.customer?.name || 'U')[0].toUpperCase()}
+                </Avatar>
+              )}
+              <Box>
+                <Typography variant="subtitle2">
+                  {order.customer?.name || order.customer?.email || 'Заказчик'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {formattedDate}
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+          
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+              <Typography variant="h6" fontWeight="bold" color="primary.main">
+                {order.price} ₽
+              </Typography>
+              {order.minBudget && order.maxBudget && (
+                <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                  (бюджет: {order.minBudget}-{order.maxBudget} ₽)
+                </Typography>
               )}
             </Box>
-          ))}
-        </Box>
-      )}
-
-      <MuiLink href={`/orders/${order.id}`} underline="none">
-        Подробнее
-      </MuiLink>
-
-      <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap" }}>
-        {userRole === "freelancer" &&
-          order.status === "pending" &&
-          !isCurrentUserOrder && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleTakeOrder}
-              disabled={isLoading}
-            >
-              Взять заказ
-            </Button>
-          )}
-
-        {isCurrentUserOrder && 
-          order.status === "waiting_confirmation" && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleConfirmOrder}
-              disabled={isLoading}
-            >
-              Подтвердить исполнителя
-            </Button>
-          )}
-
-        {isCurrentUserOrder && order.status === "pending" && (
-          <Button
+          </Grid>
+        </Grid>
+      </CardContent>
+      
+      <CardActions sx={{ p: 2, pt: 0, justifyContent: 'flex-end' }}>
+        <Button 
+          size="small" 
+          color="primary" 
+          variant="outlined"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigateToDetails();
+          }}
+        >
+          Подробнее
+        </Button>
+        
+        {userRole === "freelancer" && order.status === "pending" && !isCurrentUserOrder && !hasApplied && (
+          <Button 
+            size="small" 
+            color="primary" 
             variant="contained"
-            color="error"
-            onClick={handleDeleteOrder}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleApply();
+            }}
             disabled={isLoading}
           >
-            Удалить
+            Откликнуться
           </Button>
         )}
-      </Box>
-    </Paper>
+        
+        {isCurrentUserOrder && order.status === "waiting_confirmation" && (
+          <Button 
+            size="small" 
+            color="success" 
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleConfirmOrder();
+            }}
+            disabled={isLoading}
+          >
+            Подтвердить
+          </Button>
+        )}
+        
+        {order.applications && order.applications.length > 0 && isCurrentUserOrder && (
+          <Button 
+            size="small" 
+            color="info" 
+            variant="outlined"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateToDetails();
+            }}
+          >
+            Заявки ({order.applications.length})
+          </Button>
+        )}
+      </CardActions>
+    </Card>
   );
 }

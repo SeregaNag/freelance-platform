@@ -4,9 +4,9 @@ import { CreateMessageDto } from './dto/create-message.dto';
 
 @Injectable()
 export class ChatService {
-  constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService) {}
 
-  async createMessage(createMessageDto: CreateMessageDto, senderId: string) {
+    async createMessage(createMessageDto: CreateMessageDto, senderId: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: createMessageDto.orderId },
       select: { customerId: true, freelancerId: true },
@@ -23,34 +23,34 @@ export class ChatService {
     }
 
     return await this.prisma.message.create({
-      data: {
-        content: createMessageDto.content,
-        orderId: createMessageDto.orderId,
-        senderId,
+        data: {
+            content: createMessageDto.content,
+            orderId: createMessageDto.orderId,
+            senderId,
         receiverId,
         status: 'SENT',
-      },
-      include: {
-        sender: true,
+        },
+        include: {
+            sender: true,
         receiver: true,
-      },
+        },
     });
-  }
+    }
 
-  async getMessagesByOrderId(orderId: string) {
+    async getMessagesByOrderId(orderId: string) {
     return await this.prisma.message.findMany({
-      where: {
-        orderId,
-      },
-      include: {
-        sender: true,
+            where: {
+                orderId,
+            },
+            include: {
+                sender: true,
         receiver: true,
-      },
-      orderBy: {
-        createdAt: 'asc',
-      },
-    });
-  }
+            },
+            orderBy: {
+                createdAt: 'asc',
+            },
+        });
+    }
 
   async markMessagesAsDelivered(orderId: string, userId: string) {
     await this.prisma.message.updateMany({
@@ -67,7 +67,7 @@ export class ChatService {
 
   async markMessagesAsRead(orderId: string, userId: string) {
     await this.prisma.message.updateMany({
-      where: {
+            where: {
         orderId,
         receiverId: userId,
         status: { in: ['SENT', 'DELIVERED'] },
@@ -81,13 +81,13 @@ export class ChatService {
   async checkOrderAccess(orderId: string, userId: string): Promise<boolean> {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      select: { customerId: true, freelancerId: true },
-    });
+            select: { customerId: true, freelancerId: true },
+        });
 
-    if (!order) {
+        if (!order) {
       return false;
-    }
+        }
 
     return order.customerId === userId || order.freelancerId === userId;
-  }
+    }
 }
