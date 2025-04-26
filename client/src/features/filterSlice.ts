@@ -1,6 +1,8 @@
 import { OrderStatusFilter } from "@/types/order";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+export type SortOption = "newest" | "oldest" | "price_high" | "price_low";
+
 interface FilterState {
   status: OrderStatusFilter;
   searchQuery: string;
@@ -10,6 +12,7 @@ interface FilterState {
   };
   selectedCategories: string[];
   selectedSkills: string[];
+  sortBy: SortOption;
 }
 
 const initialState: FilterState = {
@@ -21,6 +24,7 @@ const initialState: FilterState = {
   },
   selectedCategories: [],
   selectedSkills: [],
+  sortBy: "newest",
 };
 
 const filterSlice = createSlice({
@@ -62,12 +66,16 @@ const filterSlice = createSlice({
         (skill) => skill !== action.payload
       );
     },
+    setSortBy(state, action: PayloadAction<SortOption>) {
+      state.sortBy = action.payload;
+    },
     clearAllFilters(state) {
       state.status = "all";
       state.searchQuery = "";
       state.priceRange = { min: null, max: null };
       state.selectedCategories = [];
       state.selectedSkills = [];
+      state.sortBy = "newest";
     },
   },
 });
@@ -82,6 +90,7 @@ export const {
   setSelectedSkills,
   addSkill,
   removeSkill,
+  setSortBy,
   clearAllFilters,
 } = filterSlice.actions;
 

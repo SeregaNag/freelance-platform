@@ -113,8 +113,24 @@ export default function OrderCardList({
     return true;
   });
 
+  // Сортировка заказов
+  const sortedFilteredOrders = [...filteredOrders].sort((a, b) => {
+    switch (filters.sortBy) {
+      case "newest":
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case "oldest":
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "price_high":
+        return b.price - a.price;
+      case "price_low":
+        return a.price - b.price;
+      default:
+        return 0;
+    }
+  });
+
   // Если нет заказов после фильтрации
-  if (filteredOrders.length === 0) {
+  if (sortedFilteredOrders.length === 0) {
     return (
       <Box sx={{ 
         display: 'flex', 
@@ -136,7 +152,7 @@ export default function OrderCardList({
 
   return (
     <ul style={{ padding: 0, listStyle: 'none' }}>
-      {filteredOrders.map((order) => (
+      {sortedFilteredOrders.map((order) => (
         <OrderCard 
           key={order.id} 
           order={order} 

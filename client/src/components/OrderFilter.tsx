@@ -40,6 +40,7 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { OrderStatusFilter } from "@/types/order";
+import SortMenu from './SortMenu';
 
 // Примерные данные для категорий и навыков
 const CATEGORIES = [
@@ -167,22 +168,23 @@ export default function OrderFilter() {
     <Paper 
       elevation={0} 
       sx={{ 
-        p: 2, 
+        p: { xs: 1.5, sm: 2 }, 
         mb: 3, 
         border: '1px solid #e0e0e0',
         borderRadius: 2
       }}
     >
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 2 }}>
         <TextField
           fullWidth
+          size="small"
           placeholder="Найти заказ..."
           value={searchQuery}
           onChange={handleSearchChange}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon />
+                <SearchIcon fontSize="small" />
               </InputAdornment>
             ),
             endAdornment: searchQuery ? (
@@ -197,61 +199,80 @@ export default function OrderFilter() {
               </InputAdornment>
             ) : null
           }}
-          sx={{ mb: 2 }}
+          sx={{ mb: 1.5 }}
         />
         
-        <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', py: 1 }}>
-          {Object.entries(STATUS_FILTERS).map(([key, label]) => (
-            <Chip 
-              key={key}
-              label={label}
-              clickable
-              color={status === key ? "primary" : "default"}
-              variant={status === key ? "filled" : "outlined"}
-              onClick={() => handleStatusChange(key as OrderStatusFilter)}
-              sx={{ minWidth: 'fit-content' }}
-            />
-          ))}
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: 0.5, 
+            flex: 1, 
+            maxWidth: '100%', 
+            overflow: 'hidden'
+          }}>
+            {Object.entries(STATUS_FILTERS).map(([key, label]) => (
+              <Chip 
+                key={key}
+                label={label}
+                clickable
+                size="small"
+                color={status === key ? "primary" : "default"}
+                variant={status === key ? "filled" : "outlined"}
+                onClick={() => handleStatusChange(key as OrderStatusFilter)}
+                sx={{ height: '28px' }}
+              />
+            ))}
+          </Box>
           
-          <Button 
-            variant="outlined"
-            startIcon={<FilterListIcon />}
-            onClick={() => setIsFilterDrawerOpen(true)}
-            color={activeFiltersCount > (status !== 'all' ? 1 : 0) ? "primary" : "inherit"}
-            sx={{ whiteSpace: 'nowrap', ml: 'auto!important' }}
-          >
-            Фильтры
-            {activeFiltersCount > (status !== 'all' ? 1 : 0) && (
-              <Box 
-                component="span" 
-                sx={{ 
-                  ml: 1, 
-                  bgcolor: 'primary.main', 
-                  color: 'white', 
-                  borderRadius: '50%', 
-                  width: 24, 
-                  height: 24, 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  fontSize: 12
-                }}
-              >
-                {activeFiltersCount - (status !== 'all' ? 1 : 0)}
-              </Box>
-            )}
-          </Button>
-        </Stack>
+          <Box sx={{ display: 'flex', gap: 1, mt: { xs: 1, sm: 0 } }}>
+            <SortMenu />
+            <Button 
+              variant="outlined"
+              size="small"
+              startIcon={<FilterListIcon sx={{ fontSize: '0.875rem' }} />}
+              onClick={() => setIsFilterDrawerOpen(true)}
+              color={activeFiltersCount > (status !== 'all' ? 1 : 0) ? "primary" : "inherit"}
+              sx={{ 
+                whiteSpace: 'nowrap',
+                height: '32px',
+                px: 1.5
+              }}
+            >
+              Фильтры
+              {activeFiltersCount > (status !== 'all' ? 1 : 0) && (
+                <Box 
+                  component="span" 
+                  sx={{ 
+                    ml: 1, 
+                    bgcolor: 'primary.main', 
+                    color: 'white', 
+                    borderRadius: '50%', 
+                    width: 20, 
+                    height: 20, 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    fontSize: 11
+                  }}
+                >
+                  {activeFiltersCount - (status !== 'all' ? 1 : 0)}
+                </Box>
+              )}
+            </Button>
+          </Box>
+        </Box>
         
         {/* Активные фильтры чипсы */}
         {activeFiltersCount > 0 && (
-          <Box sx={{ mt: 2 }}>
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Box sx={{ mt: 1.5 }}>
+            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ gap: '4px !important' }}>
               {status !== 'all' && (
                 <Chip 
                   label={`Статус: ${STATUS_FILTERS[status]}`}
                   onDelete={() => handleStatusChange('all')}
                   size="small"
+                  sx={{ height: '24px', '& .MuiChip-label': { fontSize: '0.75rem' } }}
                 />
               )}
               
@@ -260,6 +281,7 @@ export default function OrderFilter() {
                   label={`Поиск: ${searchQuery}`}
                   onDelete={() => dispatch(setSearchQuery(""))}
                   size="small"
+                  sx={{ height: '24px', '& .MuiChip-label': { fontSize: '0.75rem' } }}
                 />
               )}
               
@@ -268,6 +290,7 @@ export default function OrderFilter() {
                   label={`Цена: ${priceRange.min || 0} - ${priceRange.max || '∞'} ₽`}
                   onDelete={() => dispatch(setPriceRange({ min: null, max: null }))}
                   size="small"
+                  sx={{ height: '24px', '& .MuiChip-label': { fontSize: '0.75rem' } }}
                 />
               )}
               
@@ -277,6 +300,7 @@ export default function OrderFilter() {
                   label={`Категория: ${category}`}
                   onDelete={() => handleRemoveCategory(category)}
                   size="small"
+                  sx={{ height: '24px', '& .MuiChip-label': { fontSize: '0.75rem' } }}
                 />
               ))}
               
@@ -286,6 +310,7 @@ export default function OrderFilter() {
                   label={`Навык: ${skill}`}
                   onDelete={() => handleRemoveSkill(skill)}
                   size="small"
+                  sx={{ height: '24px', '& .MuiChip-label': { fontSize: '0.75rem' } }}
                 />
               ))}
               
@@ -293,9 +318,10 @@ export default function OrderFilter() {
                 <Chip 
                   label="Очистить все"
                   onDelete={handleClearAllFilters}
-                  deleteIcon={<DeleteIcon />}
+                  deleteIcon={<DeleteIcon sx={{ fontSize: '0.875rem' }} />}
                   color="error"
                   size="small"
+                  sx={{ height: '24px', '& .MuiChip-label': { fontSize: '0.75rem' } }}
                 />
               )}
             </Stack>
