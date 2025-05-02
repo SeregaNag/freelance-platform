@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, Button, TextField, Select, MenuItem, FormControl, InputLabel, List, ListItem, ListItemText, IconButton } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { enqueueSnackbar } from "notistack";
+import { useSnackbar } from 'notistack';
 import { createOrder } from "@/api/api";
 import { useDispatch } from "react-redux";
 import { orderModified } from "@/features/ordersSlice";
@@ -9,7 +9,6 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { Autocomplete, Chip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-
 
 const SKILLS = [
   'JavaScript',
@@ -51,6 +50,7 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
   const [maxBudget, setMaxBudget] = useState<number>(0);
   const [attachments, setAttachments] = useState<string[]>([]);
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -70,14 +70,13 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
         variant: "success",
       });
       dispatch(orderModified(newOrder.id));
+      onClose();
     } catch (error) {
       enqueueSnackbar(
-        `Ошибка при создании заказа ${(error as Error).message}`,
+        `Ошибка при создании заказа: ${(error as Error).message}`,
         { variant: "error" }
       );
-      return;
     }
-    onClose();
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,8 +127,8 @@ export default function CreateOrderForm({ onClose }: CreateOrderFormProps) {
         </FormControl>
 
         <Autocomplete
-          multiple
           options={SKILLS}
+          multiple
           value={skills}
           onChange={(_, newValue) => setSkills(newValue)}
           renderTags={(value, getTagProps) =>
