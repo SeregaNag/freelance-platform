@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Container, Typography, TextField, Button, Box } from "@mui/material";
+import { Container, Typography, TextField, Button, Box, Link as MuiLink, Alert } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { setProfile } from "@/features/profileSlice";
+import { setAuth } from "@/features/authSlice";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,9 +12,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         method: "POST",
@@ -24,11 +29,13 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error("Неверные учетные данные");
+        throw new Error(data.message || "Ошибка при входе");
       }
 
-      // Получаем профиль после успешного входа
+      // Получаем профиль пользователя
       const profileRes = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
         {
@@ -36,14 +43,28 @@ export default function LoginPage() {
         }
       );
 
-      if (profileRes.ok) {
-        const profileData = await profileRes.json();
-        dispatch(setProfile(profileData));
+      if (!profileRes.ok) {
+        throw new Error("Ошибка при получении профиля");
       }
 
+      const profileData = await profileRes.json();
+
+      // Устанавливаем состояние аутентификации
+      dispatch(setAuth({ 
+        isAuthenticated: true, 
+        user: {
+          id: profileData.id,
+          name: profileData.name,
+          email: profileData.email,
+          role: profileData.role
+        }
+      }));
+
       router.push("/");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Ошибка при входе");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Произошла ошибка");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -85,9 +106,24 @@ export default function LoginPage() {
           color="primary"
           fullWidth
           sx={{ mt: 2 }}
+          disabled={isLoading}
         >
-          Войти
+          {isLoading ? "Вход..." : "Войти"}
         </Button>
+        <Box sx={{ textAlign: "center", mt: 2 }}>
+          <MuiLink
+            component={Link}
+            href="/register"
+            sx={{ 
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline'
+              }
+            }}
+          >
+            Нет аккаунта? Зарегистрируйтесь
+          </MuiLink>
+        </Box>
       </Box>
     </Container>
   );

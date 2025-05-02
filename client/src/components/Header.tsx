@@ -1,20 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Box, Container, Avatar, Menu, MenuItem, IconButton } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { setProfile } from "@/features/profileSlice";
-import Image from "next/image";
+import { logout } from "@/features/authSlice";
+import ThemeSwitch from './ThemeSwitch';
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useDispatch();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const profile = useSelector((state: RootState) => state.profile.profile);
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -42,107 +46,167 @@ export default function Header() {
         method: "POST",
         credentials: "include",
       });
-      dispatch(setProfile(null));
+      dispatch(logout());
       router.push("/login");
+      handleClose();
     } catch (error) {
       console.error("Ошибка при выходе:", error);
     }
   };
 
-  return (
-    <AppBar position="static">
-      <Toolbar className="flex justify-between items-center">
-        {/* Логотип/название платформы */}
-        <Link
-          href="/"
-          passHref
-          className={`link ${
-            pathname === "/"
-              ? "border-2 border-white rounded p-1 text-white"
-              : ""
-          }`}
-        >
-          <Typography variant="h6" component="div" sx={{ cursor: "pointer" }}>
-            Freelance Platform
-          </Typography>
-        </Link>
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-        <div className="flex gap-4">
-          {profile ? (
-            <>
-              <Link
-                href="/profile"
-                passHref
-                className={`link ${
-                  pathname === "/profile"
-                    ? "border-2 border-white rounded p-1 text-white"
-                    : ""
-                }`}
-              >
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleProfileClick = () => {
+    router.push('/profile');
+    handleClose();
+  };
+
+  return (
+    <AppBar 
+      position="sticky" 
+      color="default" 
+      elevation={0}
+      sx={{ 
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        backgroundColor: 'background.paper',
+      }}
+    >
+      <Container maxWidth="lg">
+        <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
+          <Link href="/" passHref style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{
+                fontWeight: 700,
+                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                cursor: 'pointer',
+              }}
+            >
+              Freelance Platform
+            </Typography>
+          </Link>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <ThemeSwitch />
+            
+            {isAuthenticated ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                  {user?.name}
+                </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {profile.avatar && (
-                    <Box sx={{ position: 'relative', width: 32, height: 32 }}>
-                    <Image
-                        src={profile.avatar}
-                        alt="Аватар"
-                        fill
-                        style={{ objectFit: "cover", borderRadius: "50%" }}
+                  <IconButton
+                    onClick={handleMenu}
+                    size="small"
+                    sx={{ 
+                      p: 0,
+                      '&:hover': {
+                        transform: 'scale(1.05)',
+                        transition: 'transform 0.2s'
+                      }
+                    }}
+                  >
+                    {profile?.avatar ? (
+                      <Avatar 
+                        src={profile.avatar} 
+                        alt={user?.name || ''} 
+                        sx={{ 
+                          width: 40, 
+                          height: 40,
+                          border: '2px solid',
+                          borderColor: 'primary.main'
+                        }}
                       />
-                    </Box>
-                  )}
-                  <Typography
-                    variant="h6"
-                  component="div"
-                  sx={{ cursor: "pointer" }}
-                >
-                  {profile.name || profile.email}
-                  </Typography>
+                    ) : (
+                      <Avatar 
+                        sx={{ 
+                          width: 40, 
+                          height: 40,
+                          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                          border: '2px solid',
+                          borderColor: 'primary.main'
+                        }}
+                      >
+                        {(user?.name || 'U')[0].toUpperCase()}
+                      </Avatar>
+                    )}
+                  </IconButton>
+                  <Button 
+                    color="inherit" 
+                    onClick={handleLogout}
+                    sx={{ 
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      px: 2,
+                      '&:hover': {
+                        backgroundColor: 'action.hover'
+                      }
+                    }}
+                  >
+                    Выйти
+                  </Button>
                 </Box>
-              </Link>
-              <Button color="inherit" onClick={handleLogout}>
-                Выйти
-              </Button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                passHref
-                className={`link ${
-                  pathname === "/login"
-                    ? "border-2 border-white rounded p-1 text-white"
-                    : ""
-                }`}
-              >
-                <Typography
-                  variant="h6"
-                  component="div"
-                  sx={{ cursor: "pointer" }}
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorEl}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
                 >
-                  Вход
-                </Typography>
-              </Link>
-              <Link
-                href="/register"
-                passHref
-                className={`link ${
-                  pathname === "/register"
-                    ? "border-2 border-white rounded p-1 text-white"
-                    : ""
-                }`}
-              >
-                <Typography
-                  variant="h6"
-                  component="div"
-                  sx={{ cursor: "pointer" }}
-                >
-                  Регистрация
-                </Typography>
-              </Link>
-            </>
-          )}
-        </div>
-      </Toolbar>
+                  <MenuItem onClick={handleProfileClick}>Профиль</MenuItem>
+                </Menu>
+              </Box>
+            ) : (
+              <>
+                <Link href="/login" passHref>
+                  <Button 
+                    color="primary" 
+                    variant="outlined"
+                    sx={{ 
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      px: 2,
+                    }}
+                  >
+                    Войти
+                  </Button>
+                </Link>
+                <Link href="/register" passHref>
+                  <Button 
+                    color="primary" 
+                    variant="contained"
+                    sx={{ 
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      px: 2,
+                    }}
+                  >
+                    Регистрация
+                  </Button>
+                </Link>
+              </>
+            )}
+          </Box>
+        </Toolbar>
+      </Container>
     </AppBar>
   );
 }

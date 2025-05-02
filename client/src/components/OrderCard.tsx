@@ -222,9 +222,9 @@ export default function OrderCard({
           transform: 'translateY(-4px)'
         },
         border: isCurrentUserOrder 
-          ? '2px solid #4CAF50' 
+          ? '2px solid #2196F3' 
           : isCurrentUserFreelancer 
-            ? '2px solid #2196F3' 
+            ? '2px solid #21CBF3' 
             : '1px solid #e0e0e0',
         overflow: 'visible',
         position: 'relative'
@@ -234,28 +234,36 @@ export default function OrderCard({
       {isCurrentUserOrder && (
         <Chip
           label="Ваш заказ"
-          color="success"
           size="small"
           sx={{ 
             position: "absolute", 
             top: -10, 
             right: 16, 
             fontWeight: 'bold',
-            zIndex: 1 
+            zIndex: 1,
+            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+            color: 'white',
+            '&:hover': {
+              background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
+            }
           }}
         />
       )}
       {isCurrentUserFreelancer && (
         <Chip
           label="Вы исполнитель"
-          color="primary"
           size="small"
           sx={{ 
             position: "absolute", 
             top: -10, 
             right: 16, 
             fontWeight: 'bold',
-            zIndex: 1 
+            zIndex: 1,
+            background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
+            color: 'white',
+            '&:hover': {
+              background: 'linear-gradient(45deg, #1E88E5 30%, #1976D2 90%)',
+            }
           }}
         />
       )}

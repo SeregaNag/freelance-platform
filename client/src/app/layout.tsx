@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import CssBaseline from '@mui/material/CssBaseline';
+import Header from "@/components/Header";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Providers from "../providers";
-import Header from "@/components/Header";
+import Providers from '@/components/Providers';
+import ReduxProvider from '@/components/ReduxProvider';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,25 +15,27 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "My Platform",
-  description: "Freelance",
-};
-
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Providers>
-          <Header />
-          {children}
-        </Providers>
+    <html lang="ru">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ReduxProvider>
+          <Providers>
+            <CssBaseline />
+            <Header />
+            {children}
+          </Providers>
+        </ReduxProvider>
       </body>
     </html>
   );
