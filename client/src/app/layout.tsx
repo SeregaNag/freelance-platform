@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from '@/components/Providers';
 import ReduxProvider from '@/components/ReduxProvider';
+import { Metadata } from 'next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,6 +15,17 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const metadata: Metadata = {
+  title: 'Freelance Platform - Фриланс биржа',
+  description: 'Платформа для фрилансеров и заказчиков. Найдите работу или исполнителя для вашего проекта.',
+  keywords: 'фриланс, фрилансеры, заказы, проекты, удаленная работа',
+  openGraph: {
+    title: 'Freelance Platform - Фриланс биржа',
+    description: 'Платформа для фрилансеров и заказчиков. Найдите работу или исполнителя для вашего проекта.',
+    type: 'website',
+  },
+};
 
 export default function RootLayout({
   children,
