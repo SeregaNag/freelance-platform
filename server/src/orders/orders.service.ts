@@ -88,6 +88,47 @@ export class OrdersService {
     });
   }
 
+  async applyForOrder(orderId: string, freelancerId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        applications: {
+          where: {
+            freelancerId: freelancerId
+          }
+        }
+      }
+    });
+  
+    if (!order) {
+      throw new NotFoundException('Заказ не найден');
+    }
+  
+    if (order.status !== 'pending') {
+      throw new BadRequestException('Заказ недоступен для подачи заявок');
+    }
+  
+    if (order.applications.length > 0) {
+      throw new BadRequestException('Вы уже подали заявку на этот заказ');
+    }
+  
+    return this.prisma.orderApplication.create({
+      data: {
+        order: {
+          connect: { id: orderId }
+        },
+        freelancer: {
+          connect: { id: freelancerId }
+        },
+        status: 'pending'
+      },
+      include: {
+        order: true,
+        freelancer: true
+      }
+    });
+  }
+
   async confirmOrder(orderId: string, customerId: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
@@ -111,5 +152,51 @@ export class OrdersService {
         freelancer: true,
       },
     });
+  }
+
+  async createTestOrder(userId: string) {
+    console.log('Creating test order for user:', userId);
+    
+    try {
+      // Проверяем существует ли пользователь
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+      
+      // Создаем тестовый заказ
+      const order = await this.prisma.order.create({
+        data: {
+          title: `Тестовый заказ для проверки чата (${new Date().toLocaleString()})`,
+          description: 'Этот заказ создан автоматически для проверки функционала чата',
+          price: 1000,
+          status: 'in_progress',
+          customer: {
+            connect: { id: userId },
+          },
+          freelancer: {
+            connect: { id: userId }, // Для тестирования чата делаем пользователя и заказчиком, и исполнителем
+          },
+        },
+        include: {
+          customer: true,
+          freelancer: true,
+        },
+      });
+      
+      console.log('Test order created:', order);
+      
+      return {
+        message: 'Тестовый заказ успешно создан',
+        orderId: order.id,
+        chatUrl: `/chat?orderId=${order.id}`,
+      };
+    } catch (error) {
+      console.error('Error creating test order:', error);
+      throw error;
+    }
   }
 }

@@ -14,6 +14,12 @@ enum OrderStatus {
   completed
 }
 
+enum ApplicationStatus {
+  pending
+  accepted
+  rejected
+}
+
 enum MessageStatus {
   SENT
   DELIVERED
@@ -31,6 +37,19 @@ model Message {
   receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   createdAt DateTime @default(now())
   status    MessageStatus @default(SENT)
+}
+
+model OrderApplication {
+  id          String   @id @default(uuid())
+  message     String?
+  status      ApplicationStatus @default(pending)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  freelancerId String
+  freelancer   User    @relation("FreelancerApplications", fields: [freelancerId], references: [id])
 }
 
 model Order {
@@ -56,6 +75,7 @@ model Order {
   freelancerId String? 
   freelancer   User?    @relation("FreelancerOrders", fields: [freelancerId], references: [id])
   messages    Message[]
+  applications OrderApplication[]
 }
 
 model User {
@@ -83,4 +103,5 @@ model User {
   freelancerOrders Order[] @relation("FreelancerOrders")
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
+  applications     OrderApplication[] @relation("FreelancerApplications")
 }

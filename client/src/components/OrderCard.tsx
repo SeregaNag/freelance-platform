@@ -154,6 +154,7 @@ export default function OrderCard({
         throw new Error("Ошибка при подаче заявки");
       }
       dispatch(orderModified(order.id));
+      router.push(`/chat?orderId=${order.id}`);
     } catch (error) {
       console.error("Ошибка при подаче заявки", error);
     } finally {

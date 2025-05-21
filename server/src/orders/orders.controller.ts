@@ -53,10 +53,24 @@ export class OrdersController {
     return this.ordersService.takeOrder(id, freelancerId);
   }
 
+  @Post(':id/apply')
+  @UseGuards(JwtAuthGuard)
+  async applyForOrder(@Param('id') id: string, @Req() req: Request) {
+    const freelancerId = (req as any).user.userId;
+    return this.ordersService.applyForOrder(id, freelancerId);
+  }
+
   @Post(':id/confirm')
   @UseGuards(JwtAuthGuard)
   async confirmOrder(@Param('id') id: string, @Req() req: Request) {
     const customerId = (req as any).user.userId;
     return this.ordersService.confirmOrder(id, customerId);
+  }
+
+  @Post('test-chat')
+  @UseGuards(JwtAuthGuard)
+  async createTestOrder(@Req() req: Request) {
+    const userId = (req as any).user.userId;
+    return this.ordersService.createTestOrder(userId);
   }
 }

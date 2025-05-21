@@ -1,12 +1,38 @@
 import { useDispatch } from "react-redux";
-import { setIsConnected, setOrderId, sendMessage, getMessages } from "@/features/chatSlice";
+import { setIsConnected, setOrderId, sendMessage, getMessages, setApplicants } from "@/features/chatSlice";
 import { Message } from "@/types/message";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-export default function useSocket(orderId: string) {
+interface ErrorResponse {
+    error: boolean;
+    message: string;
+}
+
+interface FreelancerResponse {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+}
+
+interface JoinOrderResponse {
+    applicants?: FreelancerResponse[];
+    messages: Message[];
+}
+
+function isErrorResponse(obj: any): obj is ErrorResponse {
+    return obj && typeof obj === 'object' && 'error' in obj && obj.error === true;
+}
+
+function isJoinOrderResponse(obj: any): obj is JoinOrderResponse {
+    return obj && typeof obj === 'object' && 'applicants' in obj && Array.isArray(obj.messages);
+}
+
+export default function useSocket(orderId: string, freelancerId?: string) {
     const socketRef = useRef<Socket | null>(null);
     const dispatch = useDispatch();
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         socketRef.current = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000', {
@@ -19,23 +45,64 @@ export default function useSocket(orderId: string) {
         });
 
         socketRef.current.on('connect', () => {
+            console.log('Socket connected');
             dispatch(setIsConnected(true));
             
             if (orderId) {
                 setTimeout(() => {
-                    socketRef.current?.emit('joinOrder', { orderId }, (messages: Message[]) => {
-                        dispatch(getMessages(messages));
+                    const payload = { orderId };
+                    
+                    // Если указан ID фрилансера, добавляем его в запрос
+                    if (freelancerId) {
+                        Object.assign(payload, { freelancerId });
+                    }
+                    
+                    socketRef.current?.emit('joinOrder', payload, (response: any) => {
+                        console.log('Join order response:', response);
+                        
+                        if (isErrorResponse(response)) {
+                            console.error('Error joining order:', response.message);
+                            setError(response.message);
+                            dispatch(getMessages([]));
+                        } else if (isJoinOrderResponse(response)) {
+                            // Обрабатываем специальный ответ с аппликантами и сообщениями
+                            if (response.applicants) {
+                                dispatch(setApplicants(response.applicants));
+                            }
+                            dispatch(getMessages(response.messages || []));
+                        } else if (Array.isArray(response)) {
+                            dispatch(getMessages(response));
+                        } else {
+                            console.error('Unknown response format:', response);
+                            dispatch(getMessages([]));
+                        }
                     });
                 }, 1000);
             }
         });
         
         socketRef.current.on('disconnect', () => {
+            console.log('Socket disconnected');
             dispatch(setIsConnected(false));
         });
 
+        socketRef.current.on('connect_error', (error) => {
+            console.error('Socket connection error:', error);
+            dispatch(setIsConnected(false));
+        });
+
+        socketRef.current.on('error', (error) => {
+            console.error('Socket error:', error);
+        });
+
         socketRef.current.on('message', (message: Message) => {
-            dispatch(sendMessage(message));
+            console.log('Received message:', message);
+            // Проверяем, что message имеет все необходимые поля, чтобы избежать ошибок
+            if (message && message.id && message.content && message.orderId) {
+                dispatch(sendMessage(message));
+            } else {
+                console.error('Invalid message format received:', message);
+            }
         });
 
         return () => {
@@ -43,23 +110,53 @@ export default function useSocket(orderId: string) {
                 socketRef.current.disconnect();
             }
         };
-    }, [orderId, dispatch]);
+    }, [orderId, freelancerId, dispatch]);
 
     const sendSocketMessage = async (content: string) => {
         if (!socketRef.current) {
             throw new Error('Socket not connected');
         }
 
+        if (!socketRef.current.connected) {
+            throw new Error('Socket connection lost');
+        }
+
         return new Promise((resolve, reject) => {
-            socketRef.current?.emit('message', { orderId, content }, (response: Message) => {
-                if (response) {
-                    resolve(response);
-                } else {
-                    reject(new Error('Failed to send message'));
+            // Увеличим таймаут до 10 секунд
+            const timeout = setTimeout(() => {
+                reject(new Error('Message sending timeout'));
+            }, 10000); // 10 секунд вместо 5
+
+            const payload = { 
+                orderId, 
+                content 
+            };
+            
+            // Если указан конкретный фрилансер, добавляем его ID в запрос
+            if (freelancerId) {
+                Object.assign(payload, { receiverId: freelancerId });
+            }
+
+            socketRef.current?.emit('message', payload, (response: any) => {
+                clearTimeout(timeout);
+                
+                try {
+                    if (isErrorResponse(response)) {
+                        console.error('Error sending message:', response.message);
+                        reject(new Error(response.message));
+                    } else if (response) {
+                        console.log('Message sent successfully:', response);
+                        resolve(response);
+                    } else {
+                        reject(new Error('Failed to send message'));
+                    }
+                } catch (e) {
+                    console.error('Error handling socket response:', e);
+                    reject(new Error('Error processing server response'));
                 }
             });
         });
     };
 
-    return { sendSocketMessage };
+    return { sendSocketMessage, error };
 }
