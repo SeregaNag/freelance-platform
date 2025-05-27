@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { setThemeMode } from '@/features/themeSlice';
 import CssBaseline from '@mui/material/CssBaseline';
 import { SnackbarProvider } from 'notistack';
+import AuthChecker from './AuthChecker';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch();
@@ -31,7 +32,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           horizontal: 'right',
         }}
       >
-        {children}
+        <AuthChecker>
+          {children}
+        </AuthChecker>
       </SnackbarProvider>
     </ThemeProvider>
   );

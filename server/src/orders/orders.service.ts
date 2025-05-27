@@ -40,6 +40,11 @@ export class OrdersService {
       include: {
         customer: true,
         freelancer: true,
+        applications: {
+          include: {
+            freelancer: true,
+          },
+        },
       },
     });
   }
@@ -50,6 +55,11 @@ export class OrdersService {
       include: {
         customer: true,
         freelancer: true,
+        applications: {
+          include: {
+            freelancer: true,
+          },
+        },
       },
     });
   }
@@ -155,8 +165,6 @@ export class OrdersService {
   }
 
   async createTestOrder(userId: string) {
-    console.log('Creating test order for user:', userId);
-    
     try {
       // Проверяем существует ли пользователь
       const user = await this.prisma.user.findUnique({
@@ -186,8 +194,6 @@ export class OrdersService {
           freelancer: true,
         },
       });
-      
-      console.log('Test order created:', order);
       
       return {
         message: 'Тестовый заказ успешно создан',

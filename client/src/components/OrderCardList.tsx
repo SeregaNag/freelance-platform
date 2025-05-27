@@ -19,30 +19,9 @@ export default function OrderCardList({
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const modifiedOrderIds = useSelector((state: RootState) => state.orders.modifiedOrderIds);
   const filters = useSelector((state: RootState) => state.filters);
-
-  useEffect(() => {
-    async function fetchProfile() {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
-          {
-            credentials: "include",
-          }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setCurrentUser(data);
-        }
-      } catch (error) {
-        console.error("Ошибка при получении профиля:", error);
-      }
-    }
-
-    fetchProfile();
-  }, []);
+  const currentUser = useSelector((state: RootState) => state.profile.profile);
 
   useEffect(() => {
     async function fetchOrders() {

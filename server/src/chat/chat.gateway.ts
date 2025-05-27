@@ -31,42 +31,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     ) {}
 
     afterInit() {
-        console.log('WebSocket Gateway initialized');
         this.server.use((socket, next) => this.wsAuthMiddleware.use(socket, next));
     }
     
     handleConnection(client: Socket) {
-        console.log('Client connected:', client.id);
     }
     
     handleDisconnect(client: Socket) {
-        console.log('Client disconnected:', client.id);
     }
     
     @UseGuards(WsJwtGuard)
     @SubscribeMessage('message')
     async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        console.log('Message received:', payload);
-        console.log('Client user data:', client.data?.user);
-        
         try {
             const userId = client.data.user.userId;
-            console.log('Checking access for order:', payload.orderId, 'User ID:', userId);
             
             const hasAccess = await this.chatService.checkOrderAccess(payload.orderId, userId);
             if (!hasAccess) {
-                console.error('Access denied for order:', payload.orderId);
                 return { error: true, message: 'Unauthorized: You don\'t have access to this order' };
             }
             
-            console.log('Creating message for order:', payload.orderId);
             const messagePayload = {
                 ...payload,
                 senderId: userId
             };
             
             const message = await this.chatService.createMessage(messagePayload, userId);
-            console.log('Message created:', message);
             
             this.server.to(`order:${payload.orderId}`).emit('message', message);
             
@@ -83,11 +73,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @UseGuards(WsJwtGuard)
     @SubscribeMessage('joinOrder')
     async handleJoinOrder(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
-        console.log('Join order request:', payload);
         
         try {
             const userId = client.data.user.userId;
-            console.log('Checking access for order:', payload.orderId, 'User ID:', userId);
             
             const hasAccess = await this.chatService.checkOrderAccess(payload.orderId, userId);
             if (!hasAccess) {
@@ -133,7 +121,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 interlocutorId = order.freelancerId;
             }
             
-            console.log('User joined order room:', payload.orderId, 'Interlocutor ID:', interlocutorId);
             
             // Присоединяем клиента к общей комнате заказа
             client.join(`order:${payload.orderId}`);
@@ -166,7 +153,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 };
             }
             
-            console.log('Retrieved messages count:', messages.length);
             
             return messages;
         } catch (error) {

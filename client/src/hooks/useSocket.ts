@@ -45,7 +45,6 @@ export default function useSocket(orderId: string, freelancerId?: string) {
         });
 
         socketRef.current.on('connect', () => {
-            console.log('Socket connected');
             dispatch(setIsConnected(true));
             
             if (orderId) {
@@ -58,7 +57,6 @@ export default function useSocket(orderId: string, freelancerId?: string) {
                     }
                     
                     socketRef.current?.emit('joinOrder', payload, (response: any) => {
-                        console.log('Join order response:', response);
                         
                         if (isErrorResponse(response)) {
                             console.error('Error joining order:', response.message);
@@ -82,7 +80,6 @@ export default function useSocket(orderId: string, freelancerId?: string) {
         });
         
         socketRef.current.on('disconnect', () => {
-            console.log('Socket disconnected');
             dispatch(setIsConnected(false));
         });
 
@@ -96,7 +93,6 @@ export default function useSocket(orderId: string, freelancerId?: string) {
         });
 
         socketRef.current.on('message', (message: Message) => {
-            console.log('Received message:', message);
             // Проверяем, что message имеет все необходимые поля, чтобы избежать ошибок
             if (message && message.id && message.content && message.orderId) {
                 dispatch(sendMessage(message));
@@ -145,7 +141,6 @@ export default function useSocket(orderId: string, freelancerId?: string) {
                         console.error('Error sending message:', response.message);
                         reject(new Error(response.message));
                     } else if (response) {
-                        console.log('Message sent successfully:', response);
                         resolve(response);
                     } else {
                         reject(new Error('Failed to send message'));

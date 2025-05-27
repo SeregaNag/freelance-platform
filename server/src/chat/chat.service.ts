@@ -7,7 +7,6 @@ export class ChatService {
     constructor(private prisma: PrismaService) {}
 
     async createMessage(createMessageDto: CreateMessageDto, senderId: string) {
-        console.log('Creating message. Order ID:', createMessageDto.orderId, 'Sender ID:', senderId);
         
         try {
             const order = await this.prisma.order.findUnique({
@@ -52,8 +51,7 @@ export class ChatService {
                 receiverId = order.customerId;
             }
 
-            console.log('Message receiver ID:', receiverId);
-
+          
             return await this.prisma.message.create({
                 data: {
                     content: createMessageDto.content,
@@ -142,8 +140,6 @@ export class ChatService {
     }
 
     async checkOrderAccess(orderId: string, userId: string): Promise<boolean> {
-        console.log('Checking order access. Order ID:', orderId, 'User ID:', userId);
-        
         try {
             // Проверяем, является ли пользователь заказчиком или исполнителем
             const order = await this.prisma.order.findUnique({
@@ -151,16 +147,12 @@ export class ChatService {
                 select: { customerId: true, freelancerId: true },
             });
 
-            console.log('Found order:', order);
-
             if (!order) {
-                console.log('Order not found');
                 return false;
             }
 
             // Если пользователь - заказчик или назначенный исполнитель, даем доступ
             if (order.customerId === userId || order.freelancerId === userId) {
-                console.log('User is customer or assigned freelancer, access granted');
                 return true;
             }
 
@@ -172,10 +164,7 @@ export class ChatService {
                 },
             });
 
-            const hasApplication = !!application;
-            console.log('User has application for this order:', hasApplication);
-            
-            return hasApplication;
+            return !!application;
         } catch (error) {
             console.error('Error checking order access:', error);
             return false;

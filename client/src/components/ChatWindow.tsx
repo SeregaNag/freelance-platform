@@ -1,12 +1,30 @@
 import { useSelector, useDispatch } from "react-redux";
 import { ChatState } from "../types/message";
-import { TextField, Button, Box, Typography, Paper, CircularProgress, Badge, Alert, Snackbar } from "@mui/material";
+import { 
+    TextField, 
+    Button, 
+    Box, 
+    Typography, 
+    Paper, 
+    CircularProgress, 
+    Badge, 
+    Alert, 
+    Snackbar,
+    Container,
+    Divider,
+    IconButton,
+    useTheme
+} from "@mui/material";
 import { useState, useEffect, useRef } from "react";
 import useSocket from "@/hooks/useSocket";
 import { markMessagesAsRead } from "@/features/chatSlice";
 import { Message } from "./Message";
 import { RootState } from "@/store/store";
 import LockIcon from '@mui/icons-material/Lock';
+import SendIcon from '@mui/icons-material/Send';
+import ChatIcon from '@mui/icons-material/Chat';
+import WifiIcon from '@mui/icons-material/Wifi';
+import WifiOffIcon from '@mui/icons-material/WifiOff';
 import { useRouter } from "next/navigation";
 
 interface ChatWindowProps {
@@ -23,6 +41,7 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
     const dispatch = useDispatch();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+    const theme = useTheme();
 
     useEffect(() => {
         if (socketError) {
@@ -97,77 +116,205 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
     // Проверка на ошибку доступа к заказу
     if (socketError && socketError.includes('Unauthorized')) {
         return (
-            <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
-                <LockIcon fontSize="large" color="error" />
-                <Typography variant="h6" align="center" color="error">
-                    У вас нет доступа к этому чату
-                </Typography>
-                <Typography variant="body2" align="center" color="text.secondary">
-                    Вы должны быть участником заказа для доступа к чату
-                </Typography>
-                <Button 
-                    variant="contained" 
-                    color="primary"
-                    onClick={createTestOrder}
-                    disabled={isCreatingTest}
-                    sx={{ mt: 2 }}
+            <Container maxWidth="md" sx={{ mt: 4 }}>
+                <Paper 
+                    elevation={0}
+                    sx={{ 
+                        p: 4, 
+                        borderRadius: 3,
+                        backgroundColor: 'background.paper',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        textAlign: 'center'
+                    }}
                 >
-                    {isCreatingTest ? <CircularProgress size={24} /> : 'Создать тестовый заказ'}
-                </Button>
-            </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                        <LockIcon sx={{ fontSize: 64, color: 'error.main', opacity: 0.7 }} />
+                        <Typography variant="h5" color="error.main" fontWeight="600">
+                            Доступ к чату ограничен
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 400 }}>
+                            Вы должны быть участником заказа для доступа к чату. Подайте заявку на заказ или создайте тестовый заказ.
+                        </Typography>
+                        <Button 
+                            variant="contained" 
+                            color="primary"
+                            onClick={createTestOrder}
+                            disabled={isCreatingTest}
+                            size="large"
+                            sx={{ 
+                                mt: 2,
+                                borderRadius: 2,
+                                px: 4,
+                                py: 1.5
+                            }}
+                        >
+                            {isCreatingTest ? <CircularProgress size={24} color="inherit" /> : 'Создать тестовый заказ'}
+                        </Button>
+                    </Box>
+                </Paper>
+            </Container>
         );
     }
 
     return (
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6">Chat</Typography>
-                <Badge 
-                    badgeContent={isConnected ? "✓" : "✗"} 
-                    color={isConnected ? "success" : "error"}
-                    sx={{ ml: 2 }}
-                >
-                    <Typography variant="body2">Status</Typography>
-                </Badge>
-            </Box>
-            
-            <Paper sx={{ flexGrow: 1, mb: 2, overflow: 'auto', p: 2, maxHeight: '400px' }}>
-                {!messages || messages.length === 0 ? (
-                    <Typography align="center" color="text.secondary">
-                        Сообщений пока нет. Начните общение!
-                    </Typography>
-                ) : (
-                    messages.map((msg) => (
-                        <Message key={msg.id} message={msg} />
-                    ))
-                )}
-                <div ref={messagesEndRef} />
-            </Paper>
-
-            <Box sx={{ display: 'flex', gap: 1 }}>
-                <TextField
-                    label="Message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    fullWidth
-                    disabled={!isConnected || isSending}
-                    onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSendMessage(e);
-                        }
+        <Container maxWidth="md" sx={{ mt: 2, mb: 2 }}>
+            <Paper 
+                elevation={0}
+                sx={{ 
+                    height: '80vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    borderRadius: 3,
+                    backgroundColor: 'background.paper',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    overflow: 'hidden'
+                }}
+            >
+                {/* Заголовок чата */}
+                <Box 
+                    sx={{ 
+                        p: 2,
+                        backgroundColor: theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50',
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
                     }}
-                    error={!isConnected}
-                    helperText={!isConnected ? "Нет соединения с сервером" : ""}
-                />
-                <Button 
-                    variant="contained" 
-                    onClick={handleSendMessage}
-                    disabled={!isConnected || !message.trim() || isSending}
                 >
-                    {isSending ? <CircularProgress size={24} /> : 'Send'}
-                </Button>
-            </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <ChatIcon color="primary" />
+                        <Typography variant="h6" fontWeight="600">
+                            Чат по заказу
+                        </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {isConnected ? (
+                            <WifiIcon color="success" sx={{ fontSize: 20 }} />
+                        ) : (
+                            <WifiOffIcon color="error" sx={{ fontSize: 20 }} />
+                        )}
+                        <Typography 
+                            variant="caption" 
+                            color={isConnected ? 'success.main' : 'error.main'}
+                            fontWeight="500"
+                        >
+                            {isConnected ? 'Подключено' : 'Отключено'}
+                        </Typography>
+                    </Box>
+                </Box>
+                
+                {/* Область сообщений */}
+                <Box 
+                    sx={{ 
+                        flexGrow: 1,
+                        overflow: 'auto',
+                        p: 2,
+                        backgroundColor: theme.palette.mode === 'dark' ? 'grey.900' : '#fafafa',
+                        '&::-webkit-scrollbar': {
+                            width: '6px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            backgroundColor: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: 'rgba(0,0,0,0.2)',
+                            borderRadius: '3px',
+                        },
+                    }}
+                >
+                    {!messages || messages.length === 0 ? (
+                        <Box 
+                            sx={{ 
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '100%',
+                                gap: 2
+                            }}
+                        >
+                            <ChatIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
+                            <Typography variant="h6" color="text.secondary" align="center">
+                                Сообщений пока нет
+                            </Typography>
+                            <Typography variant="body2" color="text.disabled" align="center">
+                                Начните общение, отправив первое сообщение
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <>
+                            {messages.map((msg) => (
+                                <Message key={msg.id} message={msg} />
+                            ))}
+                            <div ref={messagesEndRef} />
+                        </>
+                    )}
+                </Box>
+
+                <Divider />
+
+                {/* Поле ввода */}
+                <Box 
+                    component="form"
+                    onSubmit={handleSendMessage}
+                    sx={{ 
+                        p: 2,
+                        backgroundColor: 'background.paper',
+                        display: 'flex',
+                        gap: 1,
+                        alignItems: 'flex-end'
+                    }}
+                >
+                    <TextField
+                        placeholder="Введите сообщение..."
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        fullWidth
+                        multiline
+                        maxRows={4}
+                        disabled={!isConnected || isSending}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                                backgroundColor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.50',
+                            }
+                        }}
+                        error={!isConnected}
+                        helperText={!isConnected ? "Нет соединения с сервером" : ""}
+                    />
+                    <IconButton 
+                        type="submit"
+                        color="primary"
+                        disabled={!isConnected || !message.trim() || isSending}
+                        sx={{
+                            backgroundColor: 'primary.main',
+                            color: 'white',
+                            '&:hover': {
+                                backgroundColor: 'primary.dark',
+                            },
+                            '&:disabled': {
+                                backgroundColor: 'grey.300',
+                                color: 'grey.500',
+                            },
+                            width: 48,
+                            height: 48,
+                            borderRadius: 2
+                        }}
+                    >
+                        {isSending ? (
+                            <CircularProgress size={20} color="inherit" />
+                        ) : (
+                            <SendIcon />
+                        )}
+                    </IconButton>
+                </Box>
+            </Paper>
 
             <Snackbar 
                 open={!!error} 
@@ -175,10 +322,14 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
                 onClose={handleCloseError}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert severity="error" onClose={handleCloseError}>
+                <Alert 
+                    severity="error" 
+                    onClose={handleCloseError}
+                    sx={{ borderRadius: 2 }}
+                >
                     {error}
                 </Alert>
             </Snackbar>
-        </Box>
+        </Container>
     );
 }

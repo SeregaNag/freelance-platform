@@ -41,7 +41,7 @@ const commonTheme: ThemeOptions = {
     MuiButton: {
       styleOverrides: {
         root: {
-          transition: 'all 0.2s ease-in-out',
+          transition: 'transform 0.2s ease-in-out',
           '&:hover': {
             transform: 'translateY(-1px)',
           },
@@ -57,9 +57,9 @@ const commonTheme: ThemeOptions = {
     MuiCard: {
       styleOverrides: {
         root: {
-          transition: 'all 0.3s ease',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
           '&:hover': {
-            transform: 'translateY(-4px)',
+            transform: 'translateY(-2px)',
             boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
           },
         },
@@ -68,7 +68,7 @@ const commonTheme: ThemeOptions = {
     MuiChip: {
       styleOverrides: {
         root: {
-          transition: 'all 0.2s ease',
+          transition: 'transform 0.15s ease',
           '&:hover': {
             transform: 'translateY(-1px)',
           },
@@ -148,9 +148,9 @@ export const darkTheme = createTheme({
       styleOverrides: {
         ...commonTheme.components?.MuiCard?.styleOverrides,
         root: {
-          transition: 'all 0.3s ease',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
           '&:hover': {
-            transform: 'translateY(-4px)',
+            transform: 'translateY(-2px)',
             boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
           },
         },

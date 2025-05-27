@@ -1,19 +1,16 @@
 import {
   Button,
-  Link as MuiLink,
-  Paper,
   Typography,
   Chip,
   Box,
   Card,
   CardContent,
   CardActions,
-  Stack,
   Avatar,
   Grid,
   Divider,
 } from "@mui/material";
-import { Order, OrderStatus, OrderApplication } from "@/types/order";
+import { Order, OrderStatus } from "@/types/order";
 import { UserRole } from "@/types/roles";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -74,6 +71,8 @@ export default function OrderCard({
   const hasApplied = order.applications?.some(
     (app) => app.freelancer.id === currentUser?.id
   );
+
+
 
   const handleTakeOrder = async () => {
     try {
@@ -208,26 +207,25 @@ export default function OrderCard({
     router.push(`/orders/${order.id}`);
   };
 
+  const handleOpenChat = () => {
+    router.push(`/chat?orderId=${order.id}`);
+  };
+
   // Формат даты
   const formattedDate = format(new Date(order.createdAt), 'dd MMM', { locale: ru });
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
     >
       <Card 
         sx={{ 
           mb: 3, 
           cursor: 'pointer', 
-          transition: 'all 0.3s ease',
           borderRadius: 2,
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-          '&:hover': {
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
-          },
           border: isCurrentUserOrder 
             ? '2px solid #2196F3' 
             : isCurrentUserFreelancer 
@@ -401,6 +399,32 @@ export default function OrderCard({
             </Button>
           )}
           
+          {userRole === "freelancer" && !isCurrentUserOrder && hasApplied && (
+            <Button 
+              size="small" 
+              color="primary" 
+              variant="contained"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenChat();
+              }}
+              disabled={isLoading}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 600,
+                px: 2,
+                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                }
+              }}
+            >
+              💬 Войти в чат
+            </Button>
+          )}
+          
           {isCurrentUserOrder && order.status === "waiting_confirmation" && (
             <Button 
               size="small" 
@@ -427,6 +451,32 @@ export default function OrderCard({
               }}
             >
               Заявки ({order.applications.length})
+            </Button>
+          )}
+          
+          {isCurrentUserOrder && ((order.applications && order.applications.length > 0) || order.freelancer) && (
+            <Button 
+              size="small" 
+              color="primary" 
+              variant="contained"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenChat();
+              }}
+              disabled={isLoading}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 600,
+                px: 2,
+                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                }
+              }}
+            >
+              💬 Войти в чат
             </Button>
           )}
         </CardActions>

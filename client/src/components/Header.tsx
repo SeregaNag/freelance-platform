@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AppBar, Toolbar, Typography, Button, Box, Container, Avatar, Menu, MenuItem, IconButton } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Box, Container, Avatar, Menu, MenuItem, IconButton, CircularProgress } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,26 +19,15 @@ export default function Header() {
   const profile = useSelector((state: RootState) => state.profile.profile);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const user = useSelector((state: RootState) => state.auth.user);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
 
+  // Проверяем, завершилась ли проверка аутентификации
   useEffect(() => {
-    async function fetchProfile() {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
-          {
-            credentials: "include",
-          }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          dispatch(setProfile(data));
-        }
-      } catch (error) {
-        console.error("Ошибка при получении профиля:", error);
-      }
+    // Если есть пользователь или явно не аутентифицирован, значит проверка завершена
+    if (user || isAuthenticated === false) {
+      setIsAuthChecking(false);
     }
-    fetchProfile();
-  }, [dispatch]);
+  }, [user, isAuthenticated]);
 
   const handleLogout = async () => {
     try {
@@ -99,7 +88,9 @@ export default function Header() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <ThemeSwitch />
             
-            {isAuthenticated ? (
+            {isAuthChecking ? (
+              <CircularProgress size={20} />
+            ) : isAuthenticated ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Typography variant="body1" sx={{ fontWeight: 500 }}>
                   {user?.name}

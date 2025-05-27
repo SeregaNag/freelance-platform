@@ -38,29 +38,19 @@ export default function ProfilePage() {
       return;
     }
 
-    async function fetchProfile() {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
-          {
-            credentials: "include",
-          }
-        );
-        if (!res.ok) {
-          throw new Error("Ошибка при получении профиля");
-        }
-        const data = await res.json();
-        dispatch(setProfile(data));
-        setEditedProfile(data);
-      } catch (error) {
-        setError(error instanceof Error ? error.message : "Произошла ошибка");
-      } finally {
+    // Если профиль уже загружен AuthChecker'ом, используем его
+    if (profile) {
+      setEditedProfile(profile);
+      setIsLoading(false);
+    } else {
+      // Если профиль еще не загружен, ждем немного
+      const timer = setTimeout(() => {
         setIsLoading(false);
-      }
+      }, 500); // Уменьшаем время ожидания
+      
+      return () => clearTimeout(timer);
     }
-
-    fetchProfile();
-  }, [dispatch, router, isAuthenticated]);
+  }, [dispatch, router, isAuthenticated, profile]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -167,7 +157,7 @@ export default function ProfilePage() {
               )}
               <Typography variant="h5" component="h1" align="center">
                 {profile?.name || "Пользователь"}
-              </Typography>
+      </Typography>
               <Chip
                 label={profile?.roles?.includes("freelancer") ? "Фрилансер" : "Заказчик"}
                 color="primary"
@@ -183,7 +173,7 @@ export default function ProfilePage() {
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" gutterBottom>
                 Информация о профиле
-              </Typography>
+          </Typography>
               <Divider sx={{ mb: 2 }} />
               {isEditing ? (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -216,8 +206,8 @@ export default function ProfilePage() {
                     }
                   />
                   <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-                    <Button
-                      variant="contained"
+          <Button
+            variant="contained"
                       onClick={handleSave}
                       disabled={isLoading}
                       sx={{
@@ -403,9 +393,9 @@ export default function ProfilePage() {
                     sx={{ alignSelf: "flex-start", mt: 2 }}
                   >
                     Редактировать профиль
-                  </Button>
-                </Box>
-              )}
+          </Button>
+        </Box>
+      )}
             </Box>
           </Grid>
         </Grid>
