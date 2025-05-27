@@ -2,6 +2,7 @@ import { Controller, Get, UseGuards, Param, Post, Body, Req } from '@nestjs/comm
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard/jwt-auth.guard';
 import { ChatService } from './chat.service';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { ChatItemDto } from './dto/chat-item.dto';
 import { Request } from 'express';
 
 interface RequestWithUser extends Request {
@@ -14,6 +15,12 @@ interface RequestWithUser extends Request {
 @UseGuards(JwtAuthGuard)
 export class ChatController {
     constructor(private readonly chatService: ChatService) {}
+
+    @Get()
+    async getUserChats(@Req() req: RequestWithUser): Promise<ChatItemDto[]> {
+        const userId = req.user.userId;
+        return this.chatService.getUserChats(userId);
+    }
 
     @Get('messages/:orderId')
     async getMessages(@Param('orderId') orderId: string, @Req() req: RequestWithUser) {

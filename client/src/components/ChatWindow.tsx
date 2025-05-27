@@ -20,7 +20,7 @@ import useSocket from "@/hooks/useSocket";
 import { markMessagesAsRead } from "@/features/chatSlice";
 import { Message } from "./Message";
 import { RootState } from "@/store/store";
-import LockIcon from '@mui/icons-material/Lock';
+
 import SendIcon from '@mui/icons-material/Send';
 import ChatIcon from '@mui/icons-material/Chat';
 import WifiIcon from '@mui/icons-material/Wifi';
@@ -29,15 +29,16 @@ import { useRouter } from "next/navigation";
 
 interface ChatWindowProps {
     orderId: string;
+    freelancerId?: string;
 }
 
-export default function ChatWindow({ orderId }: ChatWindowProps) {
+export default function ChatWindow({ orderId, freelancerId }: ChatWindowProps) {
     const { messages, isConnected } = useSelector((state: RootState) => state.chat);
     const [message, setMessage] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isCreatingTest, setIsCreatingTest] = useState(false);
-    const { sendSocketMessage, error: socketError } = useSocket(orderId);
+
+    const { sendSocketMessage, error: socketError } = useSocket(orderId, freelancerId);
     const dispatch = useDispatch();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
@@ -53,7 +54,7 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
         if (messages && messages.length > 0) {
             dispatch(markMessagesAsRead());
         }
-    }, [dispatch]);
+    }, [dispatch, freelancerId]);
 
     useEffect(() => {
         if (messagesEndRef.current && messages && messages.length > 0) {
@@ -88,90 +89,58 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
         setError(null);
     };
 
-    const createTestOrder = async () => {
-        setIsCreatingTest(true);
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/test-chat`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
 
-            if (!response.ok) {
-                throw new Error('Не удалось создать тестовый заказ');
-            }
 
-            const data = await response.json();
-            router.push(data.chatUrl);
-        } catch (err) {
-            console.error('Error creating test order:', err);
-            setError(err instanceof Error ? err.message : 'Произошла ошибка');
-        } finally {
-            setIsCreatingTest(false);
-        }
-    };
-
-    // Проверка на ошибку доступа к заказу
-    if (socketError && socketError.includes('Unauthorized')) {
+    // Если есть ошибка подключения, показываем сообщение
+    if (socketError && !isConnected) {
         return (
-            <Container maxWidth="md" sx={{ mt: 4 }}>
-                <Paper 
-                    elevation={0}
+            <Box 
+                sx={{ 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    gap: 3,
+                    p: 4,
+                    textAlign: 'center'
+                }}
+            >
+                <WifiOffIcon sx={{ fontSize: 64, color: 'error.main', opacity: 0.7 }} />
+                <Typography variant="h5" color="error.main" fontWeight="600">
+                    Ошибка подключения
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    Не удалось подключиться к серверу чата. Проверьте интернет-соединение.
+                </Typography>
+                <Button 
+                    variant="contained" 
+                    color="primary"
+                    onClick={() => window.location.reload()}
+                    size="large"
                     sx={{ 
-                        p: 4, 
-                        borderRadius: 3,
-                        backgroundColor: 'background.paper',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        textAlign: 'center'
+                        mt: 2,
+                        borderRadius: 2,
+                        px: 4,
+                        py: 1.5
                     }}
                 >
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                        <LockIcon sx={{ fontSize: 64, color: 'error.main', opacity: 0.7 }} />
-                        <Typography variant="h5" color="error.main" fontWeight="600">
-                            Доступ к чату ограничен
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 400 }}>
-                            Вы должны быть участником заказа для доступа к чату. Подайте заявку на заказ или создайте тестовый заказ.
-                        </Typography>
-                        <Button 
-                            variant="contained" 
-                            color="primary"
-                            onClick={createTestOrder}
-                            disabled={isCreatingTest}
-                            size="large"
-                            sx={{ 
-                                mt: 2,
-                                borderRadius: 2,
-                                px: 4,
-                                py: 1.5
-                            }}
-                        >
-                            {isCreatingTest ? <CircularProgress size={24} color="inherit" /> : 'Создать тестовый заказ'}
-                        </Button>
-                    </Box>
-                </Paper>
-            </Container>
+                    Обновить страницу
+                </Button>
+            </Box>
         );
     }
 
     return (
-        <Container maxWidth="md" sx={{ mt: 2, mb: 2 }}>
-            <Paper 
-                elevation={0}
-                sx={{ 
-                    height: '80vh',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    borderRadius: 3,
-                    backgroundColor: 'background.paper',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    overflow: 'hidden'
-                }}
-            >
+        <Box 
+            sx={{ 
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                backgroundColor: 'background.paper',
+                overflow: 'hidden'
+            }}
+        >
                 {/* Заголовок чата */}
                 <Box 
                     sx={{ 
@@ -314,22 +283,21 @@ export default function ChatWindow({ orderId }: ChatWindowProps) {
                         )}
                     </IconButton>
                 </Box>
-            </Paper>
 
-            <Snackbar 
-                open={!!error} 
-                autoHideDuration={6000} 
-                onClose={handleCloseError}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            >
-                <Alert 
-                    severity="error" 
+                <Snackbar 
+                    open={!!error} 
+                    autoHideDuration={6000} 
                     onClose={handleCloseError}
-                    sx={{ borderRadius: 2 }}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                 >
-                    {error}
-                </Alert>
-            </Snackbar>
-        </Container>
-    );
+                    <Alert 
+                        severity="error" 
+                        onClose={handleCloseError}
+                        sx={{ borderRadius: 2 }}
+                    >
+                        {error}
+                    </Alert>
+                </Snackbar>
+            </Box>
+        );
 }

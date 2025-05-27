@@ -35,6 +35,12 @@ export default function useSocket(orderId: string, freelancerId?: string) {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        // Отключаем старое соединение
+        if (socketRef.current) {
+            socketRef.current.disconnect();
+        }
+        
+        // Создаем новое соединение для нового чата
         socketRef.current = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000', {
             path: '/chat',
             withCredentials: true,
